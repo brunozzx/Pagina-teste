@@ -1,328 +1,1071 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Metálica - Controle de Pedidos</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Metálica OS — Turmalina-MG</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; font-family: Arial, sans-serif; }
-    body { margin: 0; background: #f4f4f6; color: #222; }
-    header { background: #1e293b; color: #fff; padding: 16px; text-align: center; }
-    header h1 { margin: 0; font-size: 20px; }
-    header p { margin: 4px 0 0; font-size: 13px; color: #cbd5e1; }
-
-    .aviso-db {
-      background: #fef3c7; color: #92400e; text-align: center;
-      padding: 8px; font-size: 13px; border-bottom: 1px solid #fcd34d;
+    body { font-family: 'Inter', sans-serif; }
+    .opt-btn { transition: all 0.12s ease; user-select: none; }
+    .opt-btn:active { transform: scale(0.97); }
+    .opt-active {
+      background-color: #1e3a8a !important;
+      color: #ffffff !important;
+      border-color: #1e3a8a !important;
+      box-shadow: 0 2px 6px rgba(30, 58, 138, 0.28);
     }
-    .aviso-db.online { background: #dcfce7; color: #166534; border-bottom-color: #86efac; }
-
-    nav { display: flex; background: #334155; }
-    nav button {
-      flex: 1; padding: 14px 8px; border: none; background: transparent;
-      color: #cbd5e1; font-size: 15px; font-weight: bold; cursor: pointer;
-      border-bottom: 4px solid transparent;
+    .opt-active-amber {
+      background-color: #b45309 !important;
+      color: #ffffff !important;
+      border-color: #b45309 !important;
     }
-    nav button.ativo { color: #fff; background: #0f172a; border-bottom-color: #f97316; }
-
-    main { max-width: 720px; margin: 20px auto; padding: 0 15px; }
-    .tela { display: none; }
-    .tela.ativa { display: block; }
-
-    .box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin-bottom: 16px; }
-    label { display: block; font-weight: bold; margin: 12px 0 5px; font-size: 14px; }
-    input, select, textarea {
-      width: 100%; padding: 10px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px;
+    @keyframes pulse-border {
+      0%, 100% { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,0.25); }
+      50% { border-color: #fca5a5; box-shadow: 0 0 0 0 rgba(220,38,38,0); }
     }
-    textarea { resize: vertical; height: 80px; }
+    .alerta-alteracao { animation: pulse-border 1.4s infinite; }
 
-    .btn {
-      display: inline-block; width: 100%; padding: 14px; margin-top: 12px;
-      font-size: 16px; font-weight: bold; color: #fff; border: none;
-      border-radius: 6px; cursor: pointer; text-align: center; text-decoration: none;
+    @media print {
+      body * { visibility: hidden; }
+      #areaImpressao, #areaImpressao * { visibility: visible; }
+      #areaImpressao {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white;
+        padding: 20px;
+      }
     }
-    .btn-laranja { background: #ea580c; }
-    .btn-verde { background: #16a34a; }
-    .btn-azul { background: #2563eb; }
-    .btn-cinza { background: #64748b; }
-
-    .pedido-card {
-      background: #fff; border-left: 6px solid #94a3b8; padding: 16px;
-      border-radius: 6px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    .pedido-card.pendente { border-left-color: #eab308; }
-    .pedido-card.aprovado { border-left-color: #16a34a; }
-    .pedido-card.concluido { border-left-color: #2563eb; opacity: 0.75; }
-
-    .badge {
-      display: inline-block; padding: 3px 8px; font-size: 12px; font-weight: bold;
-      border-radius: 4px; background: #e2e8f0; margin-bottom: 8px;
-    }
-    .croqui-img { max-width: 100%; max-height: 220px; margin-top: 10px; border: 1px solid #ddd; border-radius: 4px; }
-    .vazio { text-align: center; color: #64748b; padding: 30px 10px; }
   </style>
 </head>
-<body>
+<body class="bg-slate-100 text-slate-900 min-h-screen pb-14">
 
-<header>
-  <h1>METÁLICA — Fluxo Vendas & Produção</h1>
-  <p>Turmalina - MG | Registro Técnico e Aprovação Rápida</p>
-</header>
+  <!-- ========================================================= -->
+  <!-- MODO 1: PORTAL EXCLUSIVO DO CLIENTE (?assinar=ID)         -->
+  <!-- ========================================================= -->
+  <div id="portalCliente" class="hidden min-h-screen bg-slate-100 flex flex-col">
+    <header class="bg-slate-900 text-white border-b-4 border-amber-500">
+      <div class="max-w-xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div>
+          <span class="text-[11px] font-bold uppercase tracking-widest text-amber-400">Portal do Cliente • Conferência</span>
+          <h1 class="text-lg font-black tracking-tight">METÁLICA • TURMALINA-MG</h1>
+        </div>
+        <span class="bg-slate-800 border border-slate-700 text-slate-200 text-xs font-bold px-3 py-1 rounded-full">
+          Pedido Oficial
+        </span>
+      </div>
+    </header>
 
-<div id="status-conexao" class="aviso-db">
-  Modo local (cole sua chave do Firebase no código para sincronizar celular e PC)
-</div>
+    <main id="conteudoPortalCliente" class="max-w-xl w-full mx-auto px-4 py-6 flex-1">
+      <div class="bg-white rounded-2xl border border-slate-200 p-8 text-center text-slate-500 font-semibold">
+        Carregando dados do seu pedido...
+      </div>
+    </main>
 
-<nav>
-  <button id="tab-vendas" class="ativo" onclick="mudarTela('vendas')">1. Vendas (Novo)</button>
-  <button id="tab-cliente" onclick="mudarTela('cliente')">2. Aprovação Cliente</button>
-  <button id="tab-fabrica" onclick="mudarTela('fabrica')">3. Fila Fábrica</button>
-</nav>
+    <footer class="text-center text-xs text-slate-500 py-5 px-4">
+      Metálica Estruturas Metálicas e Serralheria • Turmalina-MG<br>
+      A produção inicia somente após a sua confirmação acima.
+    </footer>
+  </div>
 
-<main>
-  <!-- TELA 1: COMERCIAL -->
-  <section id="tela-vendas" class="tela ativa">
-    <div class="box">
-      <h2 style="margin-top:0">Novo Pedido Sob Medida</h2>
-      <form id="form-pedido" onsubmit="salvarPedido(event)">
-        <label>Nome do Cliente *</label>
-        <input type="text" id="cliente" placeholder="Ex: Serralheria Silva / João" required>
+  <!-- ========================================================= -->
+  <!-- MODO 2: PAINEL INTERNO DO RESPONSÁVEL (ESCRITÓRIO/FÁBRICA) -->
+  <!-- ========================================================= -->
+  <div id="painelResponsavel">
+    <!-- TOPO -->
+    <header class="bg-slate-900 text-white sticky top-0 z-30 shadow-md border-b border-slate-800">
+      <div class="max-w-3xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5">
+          <div class="bg-amber-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base tracking-tight">
+            METÁLICA
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="font-bold text-sm sm:text-base leading-tight">Painel do Responsável</h1>
+              <span class="bg-blue-900/80 border border-blue-700 text-blue-200 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded">
+                Acesso Interno
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-400">Turmalina-MG • Escritório & Chão de Fábrica</p>
+          </div>
+        </div>
 
-        <label>WhatsApp do Cliente (com DDD) *</label>
-        <input type="tel" id="whatsapp" placeholder="Ex: 38999999999" required>
+        <!-- STATUS FIREBASE -->
+        <div id="badgeNuvem" class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-xs font-semibold text-amber-300">
+          <span id="dotNuvem" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+          <span id="txtNuvem">Conectando...</span>
+        </div>
+      </div>
 
-        <label>Tipo de Serviço *</label>
-        <select id="servico" required>
-          <option value="">-- Selecione --</option>
-          <option value="Corte e Dobra de Chapa">Corte e Dobra de Chapa</option>
-          <option value="Corte Guilhotina / Plasma">Corte Guilhotina / Plasma</option>
-          <option value="Solda (MIG / Eletrodo)">Solda (MIG / Eletrodo)</option>
-          <option value="Estrutura Metálica">Estrutura Metálica</option>
-        </select>
+      <!-- AVISO DE REGRAS FIRESTORE -->
+      <div id="alertaFirestore" class="hidden bg-red-600 text-white text-xs px-4 py-2 text-center font-medium">
+        ⚠️ Sem permissão de leitura/gravação no Firebase. No Console Firebase → Firestore → Regras, libere leitura/escrita para testar.
+      </div>
 
-        <label>Material e Espessura / Bitola *</label>
-        <select id="material" required>
-          <option value="">-- Selecione o material --</option>
-          <option value="Aço Carbono - Chapa #18 (1,20mm)">Aço Carbono - Chapa #18 (1,20mm)</option>
-          <option value="Aço Carbono - Chapa #14 (2,00mm)">Aço Carbono - Chapa #14 (2,00mm)</option>
-          <option value="Aço Carbono - Chapa 1/8 (3,18mm)">Aço Carbono - Chapa 1/8" (3,18mm)</option>
-          <option value="Chapa Galvanizada #16 (1,55mm)">Chapa Galvanizada #16 (1,55mm)</option>
-          <option value="Metalon / Perfil Estrutural">Metalon / Perfil Estrutural</option>
-          <option value="Inox 304">Inox 304</option>
-        </select>
+      <!-- ABAS INTERNAS -->
+      <div class="max-w-3xl mx-auto px-4 pb-3 pt-1 grid grid-cols-2 gap-2">
+        <button id="tabNovo" onclick="mudarAba('novo')" class="py-3 px-3 rounded-xl font-extrabold text-sm sm:text-base bg-blue-600 text-white shadow">
+          1. CADASTRAR PEDIDO
+        </button>
+        <button id="tabFabrica" onclick="mudarAba('fabrica')" class="py-3 px-3 rounded-xl font-extrabold text-sm sm:text-base bg-slate-800 text-slate-300 border border-slate-700">
+          2. FILA DA FÁBRICA (<span id="contFabrica">0</span>)
+        </button>
+      </div>
+    </header>
 
-        <label>Medidas exatas, ângulos e quantidade *</label>
-        <textarea id="medidas" placeholder="Ex: 10 peças - 1200mm x 350mm, dobra em L de 90 graus, sem pintura." required></textarea>
+    <main class="max-w-3xl mx-auto px-4 pt-5">
 
-        <label>Foto do Rascunho / Croqui (opcional)</label>
-        <input type="file" id="foto" accept="image/*">
+      <!-- ======================================================= -->
+      <!-- ABA 1: CADASTRO PADRONIZADO (RESPONSÁVEL COMERCIAL)     -->
+      <!-- ======================================================= -->
+      <section id="telaNovo" class="space-y-4">
 
-        <button type="submit" id="btn-salvar" class="btn btn-laranja">Gerar Pedido e Enviar p/ Aprovação</button>
-      </form>
-    </div>
-  </section>
+        <!-- BLOCO A: DADOS COMERCIAIS (VISÍVEL AO CLIENTE E RESPONSÁVEL) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="bg-slate-800 text-white px-4 py-2.5 flex items-center justify-between">
+            <span class="text-xs font-extrabold uppercase tracking-wider">A. Dados Comerciais & Entrega</span>
+            <span class="text-[11px] bg-slate-700 text-amber-300 px-2 py-0.5 rounded font-semibold">Cliente + Fábrica</span>
+          </div>
 
-  <!-- TELA 2: APROVAÇÃO DO CLIENTE -->
-  <section id="tela-cliente" class="tela">
-    <div id="lista-cliente"></div>
-  </section>
+          <div class="p-4 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-extrabold uppercase text-slate-600 mb-1">Nome do Cliente *</label>
+                <input id="inpCliente" type="text" placeholder="Ex: João da Silva / Fazenda Boa Vista"
+                  class="w-full border-2 border-slate-300 focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-base font-medium outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-extrabold uppercase text-slate-600 mb-1">WhatsApp do Cliente</label>
+                <input id="inpTelefone" type="tel" placeholder="(38) 99999-9999"
+                  class="w-full border-2 border-slate-300 focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-base font-medium outline-none" />
+              </div>
+            </div>
 
-  <!-- TELA 3: CHÃO DE FÁBRICA -->
-  <section id="tela-fabrica" class="tela">
-    <div id="lista-fabrica"></div>
-  </section>
-</main>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-xs font-extrabold uppercase text-slate-600 mb-1">Prazo Combinado *</label>
+                <input id="inpPrazo" type="date"
+                  class="w-full border-2 border-slate-300 focus:border-blue-600 rounded-xl px-3 py-2.5 text-sm font-bold outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-extrabold uppercase text-slate-600 mb-1">Valor Fechado (R$) *</label>
+                <input id="inpValor" type="text" placeholder="Ex: 850,00"
+                  class="w-full border-2 border-slate-300 focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-base font-bold text-emerald-700 outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-extrabold uppercase text-slate-600 mb-1">Logística *</label>
+                <div class="grid grid-cols-2 gap-1.5">
+                  <button type="button" onclick="selecionarUnico('logistica', 'Cliente Retira', this)"
+                    class="opt-btn opt-logistica opt-active border-2 border-slate-300 rounded-xl py-2.5 px-2 text-xs font-extrabold text-center">
+                    Retira
+                  </button>
+                  <button type="button" onclick="selecionarUnico('logistica', 'Entrega Metálica', this)"
+                    class="opt-btn opt-logistica border-2 border-slate-300 bg-slate-50 rounded-xl py-2.5 px-2 text-xs font-extrabold text-center">
+                    Entregar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-  import {
-    getFirestore, collection, addDoc, updateDoc, doc, onSnapshot
-  } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+        <!-- BLOCO B: ESPECIFICAÇÃO TÉCNICA PADRONIZADA -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="bg-blue-950 text-white px-4 py-2.5 flex items-center justify-between">
+            <span class="text-xs font-extrabold uppercase tracking-wider">B. Ficha Técnica Padronizada</span>
+            <span class="text-[11px] bg-blue-900 text-blue-200 px-2 py-0.5 rounded font-semibold">Evita Erro no Corte</span>
+          </div>
 
-  // =========================================================================
-  // COLE AQUI O SEU BLOCO firebaseConfig COPIADO DO CONSOLE DO FIREBASE:
-  const firebaseConfig = {
+          <div class="p-4 space-y-5">
+            <!-- 1. TIPO DE PEÇA -->
+            <div>
+              <label class="block text-xs font-extrabold uppercase text-slate-600 mb-2">1. Tipo de Serviço / Peça *</label>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <button type="button" onclick="selecionarTipoPeca('Chapa Cortada / Dobrada', ['Corte', 'Dobra'], this)"
+                  class="opt-btn opt-peca border-2 border-slate-300 bg-slate-50 rounded-xl py-2.5 px-3 text-xs font-extrabold text-left">
+                  📐 Chapa Cortada / Dobrada
+                </button>
+                <button type="button" onclick="selecionarTipoPeca('Perfil / Barra / Viga', ['Corte'], this)"
+                  class="opt-btn opt-peca border-2 border-slate-300 bg-slate-50 rounded-xl py-2.5 px-3 text-xs font-extrabold text-left">
+                  📏 Perfil / Barra / Viga
+                </button>
+                <button type="button" onclick="selecionarTipoPeca('Portão / Grade / Esquadria', ['Corte', 'Solda', 'Pintura'], this)"
+                  class="opt-btn opt-peca border-2 border-slate-300 bg-slate-50 rounded-xl py-2.5 px-3 text-xs font-extrabold text-left">
+                  🚪 Portão / Grade
+                </button>
+                <button type="button" onclick="selecionarTipoPeca('Estrutura Metálica', ['Corte', 'Solda', 'Estrutura', 'Pintura'], this)"
+                  class="opt-btn opt-peca border-2 border-slate-300 bg-slate-50 rounded-xl py-2.5 px-3 text-xs font-extrabold text-left">
+                  🏗️ Estrutura Metálica
+                </button>
+                <button type="button" onclick="selecionarTipoPeca('Suporte / Peça Sob Medida', ['Corte', 'Dobra', 'Solda'], this)"
+                  class="opt-btn opt-peca border-2 border-slate-300 bg-slate-50 rounded-xl py-2.5 px-3 text-xs font-extrabold text-left">
+                  ⚙️ Peça Sob Medida
+                </button>
+                <button type="button" onclick="selecionarTipoPeca('Manutenção / Solda Geral', ['Solda'], this)"
+                  class="opt-btn opt-peca border-2 border-slate-300 bg-slate-50 rounded-xl py-2.5 px-3 text-xs font-extrabold text-left">
+                  🔥 Manutenção / Solda
+                </button>
+              </div>
+            </div>
+
+            <!-- 2. PROCESSOS -->
+            <div>
+              <label class="block text-xs font-extrabold uppercase text-slate-600 mb-2">2. Etapas na Fábrica *</label>
+              <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                <button type="button" data-proc="Corte" onclick="toggleProcesso(this)"
+                  class="opt-btn opt-proc border-2 border-slate-300 bg-slate-50 rounded-xl py-2.5 px-2 text-xs font-extrabold text-center">
+                  ✂️ Corte
+                </button>
+                <button type="button" data-proc="Dobra" onclick="toggleProcesso(this)"
+                  class="opt-btn opt-proc border-2 border-slate-300 bg-slate-50 rounded-xl py-2.5 px-2 text-xs font-extrabold text-center">
+                  📐 Dobra
+                </button>
+                <button type="button" data-proc="Solda" onclick="toggleProcesso(this)"
+                  class="opt-btn opt-proc border-2 border-slate-300 bg-slate-50 rounded-xl py-2.5 px-2 text-xs font-extrabold text-center">
+                  🔥 Solda
+                </button>
+                <button type="button" data-proc="Estrutura" onclick="toggleProcesso(this)"
+                  class="opt-btn opt-proc border-2 border-slate-300 bg-slate-50 rounded-xl py-2.5 px-2 text-xs font-extrabold text-center">
+                  🏗️ Montagem
+                </button>
+                <button type="button" data-proc="Pintura" onclick="toggleProcesso(this)"
+                  class="opt-btn opt-proc border-2 border-slate-300 bg-slate-50 rounded-xl py-2.5 px-2 text-xs font-extrabold text-center">
+                  🎨 Pintura
+                </button>
+              </div>
+            </div>
+
+            <!-- 3. MATERIAL -->
+            <div>
+              <label class="block text-xs font-extrabold uppercase text-slate-600 mb-2">3. Matéria-Prima (Almoxarifado) *</label>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <button type="button" onclick="selecionarUnico('material', 'Aço 1020', this)"
+                  class="opt-btn opt-material border-2 border-slate-300 bg-slate-50 rounded-xl py-3 px-2 text-sm font-extrabold text-center">
+                  Aço 1020
+                </button>
+                <button type="button" onclick="selecionarUnico('material', 'Aço 1045', this)"
+                  class="opt-btn opt-material border-2 border-slate-300 bg-slate-50 rounded-xl py-3 px-2 text-sm font-extrabold text-center">
+                  Aço 1045
+                </button>
+                <button type="button" onclick="selecionarUnico('material', 'Inox 304', this)"
+                  class="opt-btn opt-material border-2 border-slate-300 bg-slate-50 rounded-xl py-3 px-2 text-sm font-extrabold text-center">
+                  Inox 304
+                </button>
+                <button type="button" onclick="selecionarUnico('material', 'Galvanizado', this)"
+                  class="opt-btn opt-material border-2 border-slate-300 bg-slate-50 rounded-xl py-3 px-2 text-sm font-extrabold text-center">
+                  Galvanizado
+                </button>
+              </div>
+            </div>
+
+            <!-- 4. ESPESSURA -->
+            <div>
+              <label class="block text-xs font-extrabold uppercase text-slate-600 mb-2">4. Espessura / Bitola *</label>
+              <div class="grid grid-cols-4 sm:grid-cols-8 gap-1.5">
+                <button type="button" onclick="selecionarEspessura('Chapa 18 (1,2mm)', this)" class="opt-btn opt-esp border-2 border-slate-300 bg-slate-50 rounded-lg py-2 px-1 text-[11px] font-extrabold text-center">Ch. 18</button>
+                <button type="button" onclick="selecionarEspessura('Chapa 16 (1,5mm)', this)" class="opt-btn opt-esp border-2 border-slate-300 bg-slate-50 rounded-lg py-2 px-1 text-[11px] font-extrabold text-center">Ch. 16</button>
+                <button type="button" onclick="selecionarEspessura('Chapa 14 (2,0mm)', this)" class="opt-btn opt-esp border-2 border-slate-300 bg-slate-50 rounded-lg py-2 px-1 text-[11px] font-extrabold text-center">Ch. 14</button>
+                <button type="button" onclick="selecionarEspessura('1/8&quot; (3,18mm)', this)" class="opt-btn opt-esp border-2 border-slate-300 bg-slate-50 rounded-lg py-2 px-1 text-[11px] font-extrabold text-center">1/8"</button>
+                <button type="button" onclick="selecionarEspessura('3/16&quot; (4,76mm)', this)" class="opt-btn opt-esp border-2 border-slate-300 bg-slate-50 rounded-lg py-2 px-1 text-[11px] font-extrabold text-center">3/16"</button>
+                <button type="button" onclick="selecionarEspessura('1/4&quot; (6,35mm)', this)" class="opt-btn opt-esp border-2 border-slate-300 bg-slate-50 rounded-lg py-2 px-1 text-[11px] font-extrabold text-center">1/4"</button>
+                <button type="button" onclick="selecionarEspessura('3/8&quot; (9,52mm)', this)" class="opt-btn opt-esp border-2 border-slate-300 bg-slate-50 rounded-lg py-2 px-1 text-[11px] font-extrabold text-center">3/8"</button>
+                <button type="button" onclick="selecionarEspessura('OUTRA', this)" class="opt-btn opt-esp border-2 border-slate-300 bg-slate-50 rounded-lg py-2 px-1 text-[11px] font-extrabold text-center">Outra...</button>
+              </div>
+              <input id="inpOutraEspessura" type="text" placeholder="Digite a espessura ou perfil (ex: Metalon 50x30 #14, Viga U 4&quot;)"
+                class="hidden mt-2 w-full border-2 border-blue-400 rounded-xl px-3.5 py-2 text-sm font-semibold outline-none bg-blue-50/40" />
+            </div>
+
+            <!-- 5. PINTURA -->
+            <div>
+              <label class="block text-xs font-extrabold uppercase text-slate-600 mb-2">5. Acabamento / Pintura</label>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <button type="button" onclick="selecionarUnico('pintura', 'Sem Pintura (Natural)', this)"
+                  class="opt-btn opt-pintura opt-active border-2 border-slate-300 rounded-xl py-2 px-2 text-xs font-extrabold text-center">
+                  Sem Pintura
+                </button>
+                <button type="button" onclick="selecionarUnico('pintura', 'Fundo Zarcão / Primer', this)"
+                  class="opt-btn opt-pintura border-2 border-slate-300 bg-slate-50 rounded-xl py-2 px-2 text-xs font-extrabold text-center">
+                  Fundo Zarcão
+                </button>
+                <button type="button" onclick="selecionarUnico('pintura', 'Esmalte Sintético', this)"
+                  class="opt-btn opt-pintura border-2 border-slate-300 bg-slate-50 rounded-xl py-2 px-2 text-xs font-extrabold text-center">
+                  Esmalte Sintético
+                </button>
+                <button type="button" onclick="selecionarUnico('pintura', 'Pintura Eletrostática', this)"
+                  class="opt-btn opt-pintura border-2 border-slate-300 bg-slate-50 rounded-xl py-2 px-2 text-xs font-extrabold text-center">
+                  Eletrostática
+                </button>
+              </div>
+            </div>
+
+            <!-- 6. DIMENSÕES PADRONIZADAS -->
+            <div>
+              <label class="block text-xs font-extrabold uppercase text-slate-600 mb-2">6. Quantidade e Medidas Padrão (em milímetros)</label>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                <div class="bg-slate-50 border-2 border-slate-200 rounded-xl p-2.5">
+                  <span class="block text-[10px] font-extrabold uppercase text-slate-500">Quantidade (pçs) *</span>
+                  <input id="inpQtd" type="number" min="1" value="1"
+                    class="w-full bg-transparent text-lg font-black text-slate-900 outline-none mt-0.5" />
+                </div>
+                <div class="bg-slate-50 border-2 border-slate-200 rounded-xl p-2.5">
+                  <span class="block text-[10px] font-extrabold uppercase text-slate-500">Comprimento (mm)</span>
+                  <input id="inpComp" type="number" placeholder="Ex: 2000"
+                    class="w-full bg-transparent text-lg font-black text-slate-900 outline-none mt-0.5" />
+                </div>
+                <div class="bg-slate-50 border-2 border-slate-200 rounded-xl p-2.5">
+                  <span class="block text-[10px] font-extrabold uppercase text-slate-500">Largura / Alt (mm)</span>
+                  <input id="inpLarg" type="number" placeholder="Ex: 500"
+                    class="w-full bg-transparent text-lg font-black text-slate-900 outline-none mt-0.5" />
+                </div>
+                <div class="bg-slate-50 border-2 border-slate-200 rounded-xl p-2.5">
+                  <span class="block text-[10px] font-extrabold uppercase text-slate-500">Dobra / Aba (mm)</span>
+                  <input id="inpDobra" type="number" placeholder="Ex: 50"
+                    class="w-full bg-transparent text-lg font-black text-slate-900 outline-none mt-0.5" />
+                </div>
+              </div>
+
+              <input id="inpObsTecnica" type="text" placeholder="Detalhes extras visíveis ao cliente e fábrica (Ex: 4 furos de 10mm nas pontas, cor preto fosco)"
+                class="mt-2.5 w-full border-2 border-slate-300 focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-sm font-medium outline-none" />
+            </div>
+
+            <!-- 7. CROQUI SIMPLES -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-xs font-extrabold uppercase text-slate-600">7. Croqui Rápido (Desenho com cotas)</label>
+                <button type="button" onclick="limparCroqui()" class="text-xs font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-lg">
+                  Limpar Desenho
+                </button>
+              </div>
+              <canvas id="canvasCroqui" width="680" height="220"
+                class="w-full h-44 sm:h-52 bg-slate-50 border-2 border-dashed border-slate-400 rounded-xl touch-none cursor-crosshair"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- BLOCO C: CONTROLE INTERNO RESTRITO AO RESPONSÁVEL -->
+        <div class="bg-amber-50/70 rounded-2xl shadow-sm border-2 border-amber-200 overflow-hidden">
+          <div class="bg-amber-900 text-amber-100 px-4 py-2 flex items-center justify-between">
+            <span class="text-xs font-extrabold uppercase tracking-wider">C. Controle Interno (Somente Equipe Metálica)</span>
+            <span class="text-[11px] bg-amber-800 text-amber-200 px-2 py-0.5 rounded font-bold">Oculto do Cliente</span>
+          </div>
+
+          <div class="p-4 space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-extrabold uppercase text-amber-950 mb-1">Responsável pelo Orçamento</label>
+                <input id="inpAtendente" type="text" placeholder="Nome de quem atendeu no escritório"
+                  class="w-full bg-white border-2 border-amber-300 focus:border-amber-600 rounded-xl px-3 py-2 text-sm font-semibold outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-extrabold uppercase text-amber-950 mb-1">Situação de Estoque (Almoxarifado)</label>
+                <div class="grid grid-cols-2 gap-1.5">
+                  <button type="button" onclick="selecionarUnico('estoque', 'Material em Estoque', this)"
+                    class="opt-btn opt-estoque opt-active-amber border-2 border-amber-400 rounded-xl py-2 px-2 text-xs font-extrabold text-center">
+                    ✅ Tem no Estoque
+                  </button>
+                  <button type="button" onclick="selecionarUnico('estoque', 'Comprar Material', this)"
+                    class="opt-btn opt-estoque border-2 border-amber-300 bg-white rounded-xl py-2 px-2 text-xs font-extrabold text-center">
+                    🛒 Precisa Comprar
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-extrabold uppercase text-amber-950 mb-1">Observação Interna para o Chão de Fábrica (Não aparece pro cliente)</label>
+              <input id="inpObsInterna" type="text" placeholder="Ex: Usar retalho de chapa 14 que está na baia 2 / Prioridade encarregado"
+                class="w-full bg-white border-2 border-amber-300 focus:border-amber-600 rounded-xl px-3 py-2 text-sm font-medium outline-none" />
+            </div>
+          </div>
+        </div>
+
+        <!-- BOTÃO SALVAR E GERAR LINK DO CLIENTE -->
+        <button id="btnSalvar" onclick="salvarPedido()"
+          class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-black text-base sm:text-lg py-4 px-5 rounded-2xl shadow-lg transition flex items-center justify-center gap-2">
+          <span>SALVAR OS & COPIAR LINK DO CLIENTE</span>
+        </button>
+
+      </section>
+
+      <!-- ======================================================= -->
+      <!-- ABA 2: FILA DA FÁBRICA (EXCLUSIVA DO RESPONSÁVEL)       -->
+      <!-- ======================================================= -->
+      <section id="telaFabrica" class="hidden space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 bg-white p-3 rounded-xl border border-slate-200">
+          <div class="flex flex-wrap gap-1.5">
+            <button onclick="filtrar('TODOS')" id="f-TODOS" class="filtro-btn px-3 py-1.5 rounded-lg text-xs font-extrabold bg-slate-900 text-white">Todos</button>
+            <button onclick="filtrar('AGUARDANDO')" id="f-AGUARDANDO" class="filtro-btn px-3 py-1.5 rounded-lg text-xs font-extrabold bg-slate-100 text-slate-700">Aguardando Cliente</button>
+            <button onclick="filtrar('LIBERADO')" id="f-LIBERADO" class="filtro-btn px-3 py-1.5 rounded-lg text-xs font-extrabold bg-slate-100 text-slate-700">Liberados</button>
+            <button onclick="filtrar('ALTERACAO')" id="f-ALTERACAO" class="filtro-btn px-3 py-1.5 rounded-lg text-xs font-extrabold bg-slate-100 text-slate-700">Alteração</button>
+            <button onclick="filtrar('PRONTO')" id="f-PRONTO" class="filtro-btn px-3 py-1.5 rounded-lg text-xs font-extrabold bg-slate-100 text-slate-700">Prontos</button>
+          </div>
+          <span class="text-[11px] font-semibold text-slate-500">Tempo real • Wi-Fi Galpão</span>
+        </div>
+
+        <div id="listaPedidos" class="space-y-4">
+          <div class="bg-white rounded-2xl p-8 text-center text-slate-500 font-semibold border border-slate-200">
+            Carregando pedidos da nuvem...
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ÁREA OCULTA PARA IMPRESSÃO FÍSICA DA OS -->
+  <div id="areaImpressao" class="hidden"></div>
+
+  <!-- TOAST -->
+  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-5 py-3 rounded-full text-sm font-bold shadow-2xl opacity-0 pointer-events-none transition-opacity duration-200 z-50 text-center max-w-[92vw]"></div>
+
+  <!-- FIREBASE SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getFirestore, collection, addDoc, onSnapshot,
+      doc, updateDoc, deleteDoc, getDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
       apiKey: "AIzaSyAxFOcnyMtE3JSrgI5sI2q4ZbKz1CY0vxg",
       authDomain: "metalica-269f8.firebaseapp.com",
       projectId: "metalica-269f8",
       storageBucket: "metalica-269f8.firebasestorage.app",
       messagingSenderId: "444810824211",
       appId: "1:444810824211:web:6b12f56d6432d9f8664de6"
-};
-  // =========================================================================
-
-  const firebaseAtivo = firebaseConfig.apiKey !== "COLE_SUA_API_KEY_AQUI";
-  let db = null;
-  let pedidosCache = [];
-
-  if (firebaseAtivo) {
-    const app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
-    const barra = document.getElementById("status-conexao");
-    barra.textContent = "🟢 Conectado ao Firebase (Tempo Real ativo entre celular e PC)";
-    barra.classList.add("online");
-
-    // Escuta o banco em tempo real: qualquer mudança atualiza a tela sozinha!
-    onSnapshot(collection(db, "pedidos"), (snapshot) => {
-      pedidosCache = snapshot.docs.map(d => ({ docId: d.id, ...d.data() }));
-      pedidosCache.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-      renderizarTudo();
-    });
-  } else {
-    // Fallback local caso ainda não tenha colado a chave
-    pedidosCache = JSON.parse(localStorage.getItem("metalica_local") || "[]");
-    renderizarTudo();
-  }
-
-  window.mudarTela = function(nome) {
-    document.querySelectorAll(".tela").forEach(t => t.classList.remove("ativa"));
-    document.querySelectorAll("nav button").forEach(b => b.classList.remove("ativo"));
-    document.getElementById("tela-" + nome).classList.add("ativa");
-    document.getElementById("tab-" + nome).classList.add("ativo");
-    renderizarTudo();
-  };
-
-  function processarImagem(file) {
-    return new Promise((resolve) => {
-      if (!file) return resolve("");
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          const maxW = 550;
-          const scale = Math.min(1, maxW / img.width);
-          canvas.width = img.width * scale;
-          canvas.height = img.height * scale;
-          canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
-          resolve(canvas.toDataURL("image/jpeg", 0.65));
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-
-  window.salvarPedido = async function(event) {
-    event.preventDefault();
-    const btn = document.getElementById("btn-salvar");
-    btn.disabled = true;
-    btn.textContent = "Salvando...";
-
-    const fotoFile = document.getElementById("foto").files[0];
-    const fotoBase64 = await processarImagem(fotoFile);
-    const numeroPedido = "PED-" + Math.floor(100 + Math.random() * 900);
-
-    const novo = {
-      id: numeroPedido,
-      cliente: document.getElementById("cliente").value.trim(),
-      whatsapp: document.getElementById("whatsapp").value.replace(/\D/g, ""),
-      servico: document.getElementById("servico").value,
-      material: document.getElementById("material").value,
-      medidas: document.getElementById("medidas").value.trim(),
-      foto: fotoBase64,
-      status: "pendente",
-      timestamp: Date.now(),
-      dataAprovacao: ""
     };
 
-    if (firebaseAtivo) {
-      await addDoc(collection(db, "pedidos"), novo);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const COLECAO = "pedidos_metalica";
+
+    let pedidos = [];
+    let filtroAtual = "TODOS";
+
+    let selecao = {
+      tipoPeca: "",
+      processos: [],
+      material: "",
+      espessura: "",
+      pintura: "Sem Pintura (Natural)",
+      logistica: "Cliente Retira",
+      estoque: "Material em Estoque"
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const idAssinar = params.get("assinar");
+
+    // Define prazo padrão para +3 dias
+    const dPadrao = new Date();
+    dPadrao.setDate(dPadrao.getDate() + 3);
+    const inpPrazoEl = document.getElementById("inpPrazo");
+    if (inpPrazoEl) inpPrazoEl.value = dPadrao.toISOString().split("T")[0];
+
+    // =========================================================
+    // ROTEAMENTO: SE TIVER ?assinar=ID, ABRE SÓ O PORTAL CLIENTE
+    // =========================================================
+    if (idAssinar) {
+      document.getElementById("painelResponsavel").classList.add("hidden");
+      document.getElementById("portalCliente").classList.remove("hidden");
+      carregarPortalCliente(idAssinar);
     } else {
-      novo.docId = String(Date.now());
-      pedidosCache.unshift(novo);
-      localStorage.setItem("metalica_local", JSON.stringify(pedidosCache));
-      renderizarTudo();
+      iniciarEscutaResponsavel();
     }
 
-    document.getElementById("form-pedido").reset();
-    btn.disabled = false;
-    btn.textContent = "Gerar Pedido e Enviar p/ Aprovação";
-    alert("Pedido " + numeroPedido + " registrado!");
-    mudarTela("cliente");
-  };
+    function iniciarEscutaResponsavel() {
+      onSnapshot(collection(db, COLECAO), (snapshot) => {
+        document.getElementById("dotNuvem").className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
+        document.getElementById("txtNuvem").textContent = "Online • Sincronizado";
+        document.getElementById("badgeNuvem").className = "flex items-center gap-1.5 bg-emerald-950/80 border border-emerald-700 px-3 py-1.5 rounded-full text-xs font-bold text-emerald-300";
+        document.getElementById("alertaFirestore").classList.add("hidden");
 
-  window.aprovarPedido = async function(docId, numeroPedido) {
-    const hora = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-    if (firebaseAtivo) {
-      await updateDoc(doc(db, "pedidos", docId), { status: "aprovado", dataAprovacao: hora });
-    } else {
-      const item = pedidosCache.find(p => p.docId === docId);
-      if (item) { item.status = "aprovado"; item.dataAprovacao = hora; }
-      localStorage.setItem("metalica_local", JSON.stringify(pedidosCache));
-      renderizarTudo();
+        pedidos = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        pedidos.sort((a, b) => (b.criadoEmMs || 0) - (a.criadoEmMs || 0));
+
+        document.getElementById("contFabrica").textContent = pedidos.filter(p => p.status !== "PRONTO").length;
+        renderizarLista();
+      }, (err) => {
+        console.error(err);
+        document.getElementById("dotNuvem").className = "w-2.5 h-2.5 rounded-full bg-red-500";
+        document.getElementById("txtNuvem").textContent = "Erro Nuvem";
+        document.getElementById("alertaFirestore").classList.remove("hidden");
+      });
     }
-    alert("Pedido " + numeroPedido + " APROVADO! Já apareceu na tela da fábrica.");
-  };
 
-  window.concluirPedido = async function(docId) {
-    if (firebaseAtivo) {
-      await updateDoc(doc(db, "pedidos", docId), { status: "concluido" });
-    } else {
-      const item = pedidosCache.find(p => p.docId === docId);
-      if (item) item.status = "concluido";
-      localStorage.setItem("metalica_local", JSON.stringify(pedidosCache));
-      renderizarTudo();
+    // =========================================================
+    // PORTAL EXCLUSIVO DO CLIENTE (SEM DADOS INTERNOS)
+    // =========================================================
+    async function carregarPortalCliente(id) {
+      const container = document.getElementById("conteudoPortalCliente");
+      try {
+        const snap = await getDoc(doc(db, COLECAO, id));
+        if (!snap.exists()) {
+          container.innerHTML = `
+            <div class="bg-white rounded-2xl border border-slate-200 p-8 text-center space-y-2">
+              <div class="text-3xl">⚠️</div>
+              <h2 class="text-lg font-black text-slate-900">Pedido não encontrado</h2>
+              <p class="text-sm text-slate-600">Verifique se o link enviado pelo WhatsApp da Metálica está completo.</p>
+            </div>`;
+          return;
+        }
+
+        const p = snap.data();
+        const jaAprovado = p.status === "LIBERADO" || p.status === "PRONTO";
+
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <!-- CABEÇALHO DO PEDIDO -->
+            <div class="bg-slate-50 border-b border-slate-200 px-5 py-4 flex items-center justify-between">
+              <div>
+                <span class="text-xs font-extrabold uppercase text-slate-400">Ordem de Serviço</span>
+                <h2 class="text-xl font-black text-slate-900">${esc(p.numeroOS)}</h2>
+              </div>
+              <span class="px-3 py-1 rounded-full text-xs font-black uppercase ${jaAprovado ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                ${jaAprovado ? '✔ Pedido Aprovado' : '⏳ Aguardando Sua Confirmação'}
+              </span>
+            </div>
+
+            <div class="p-5 space-y-5">
+              <!-- DADOS COMERCIAIS -->
+              <div>
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2">1. Dados do Seu Pedido</h3>
+                <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200 space-y-1.5 text-sm">
+                  <div class="flex justify-between"><span class="text-slate-500">Cliente:</span><strong class="text-slate-900">${esc(p.cliente)}</strong></div>
+                  <div class="flex justify-between"><span class="text-slate-500">Previsão de Entrega:</span><strong class="text-slate-900">${formatarData(p.prazo)}</strong></div>
+                  <div class="flex justify-between"><span class="text-slate-500">Retirada / Entrega:</span><strong class="text-slate-900">${esc(p.logistica || '-')}</strong></div>
+                  <div class="flex justify-between border-t border-slate-200 pt-1.5 mt-1.5">
+                    <span class="text-slate-600 font-semibold">Valor Total Combinado:</span>
+                    <strong class="text-emerald-700 text-base font-black">R$ ${esc(p.valor)}</strong>
+                  </div>
+                </div>
+              </div>
+
+              <!-- FICHA TÉCNICA PARA CONFERÊNCIA -->
+              <div>
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2">2. Especificação Técnica da Peça</h3>
+                <div class="bg-blue-50/60 rounded-xl p-3.5 border border-blue-200 space-y-2 text-sm">
+                  <div class="flex justify-between"><span class="text-slate-600">Serviço / Peça:</span><strong class="text-slate-900">${esc(p.tipoPeca || '-')}</strong></div>
+                  <div class="flex justify-between"><span class="text-slate-600">Processos:</span><strong class="text-slate-900">${(p.processos || []).join(" + ")}</strong></div>
+                  <div class="flex justify-between"><span class="text-slate-600">Material:</span><strong class="text-blue-950">${esc(p.material)}</strong></div>
+                  <div class="flex justify-between"><span class="text-slate-600">Espessura / Bitola:</span><strong class="text-slate-900">${esc(p.espessura || '-')}</strong></div>
+                  <div class="flex justify-between"><span class="text-slate-600">Pintura / Acabamento:</span><strong class="text-slate-900">${esc(p.pintura || '-')}</strong></div>
+                  <div class="border-t border-blue-200 pt-2">
+                    <span class="block text-xs font-bold uppercase text-slate-500 mb-0.5">Quantidade e Medidas:</span>
+                    <strong class="text-slate-900 text-base">${esc(p.medidasResumo)}</strong>
+                  </div>
+                  ${p.obsTecnica ? `
+                  <div class="border-t border-blue-200 pt-2">
+                    <span class="block text-xs font-bold uppercase text-slate-500 mb-0.5">Observações Técnicas:</span>
+                    <span class="text-slate-800 font-medium">${esc(p.obsTecnica)}</span>
+                  </div>` : ""}
+                </div>
+              </div>
+
+              <!-- CROQUI -->
+              ${p.croqui ? `
+              <div>
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2">3. Desenho / Croqui Técnico</h3>
+                <img src="${p.croqui}" alt="Croqui técnico do pedido" class="w-full rounded-xl border border-slate-300 bg-white" />
+              </div>` : ""}
+
+              <!-- AÇÃO DO CLIENTE -->
+              <div id="areaBotaoCliente" class="pt-2">
+                ${jaAprovado ? `
+                  <div class="bg-emerald-50 border-2 border-emerald-500 text-emerald-950 rounded-2xl p-4 text-center">
+                    <p class="font-black text-base">✅ Especificações aprovadas e enviadas para a produção!</p>
+                    <p class="text-xs mt-1 text-emerald-800">Caso precise alterar alguma medida antes da entrega, entre em contato imediatamente com a equipe da Metálica.</p>
+                  </div>
+                ` : `
+                  <button onclick="confirmarPedidoCliente('${id}')"
+                    class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-black text-base py-4 px-5 rounded-2xl shadow-lg transition">
+                    ✅ CONFIRMO AS MEDIDAS E AUTORIZO PRODUZIR
+                  </button>
+                  <p class="text-[11px] text-slate-500 text-center mt-2">
+                    Ao confirmar, você valida o material, as medidas e o valor acima para corte e fabricação sob medida.
+                  </p>
+                `}
+              </div>
+            </div>
+          </div>
+        `;
+      } catch (e) {
+        container.innerHTML = `<div class="bg-red-50 border border-red-200 text-red-800 p-6 rounded-2xl text-center font-bold">Erro ao carregar seu pedido. Tente recarregar a página.</div>`;
+      }
     }
-  };
 
-  function renderizarTudo() {
-    const pendentes = pedidosCache.filter(p => p.status === "pendente");
-    const divCliente = document.getElementById("lista-cliente");
+    window.confirmarPedidoCliente = async function(id) {
+      const box = document.getElementById("areaBotaoCliente");
+      box.innerHTML = `<div class="text-center py-4 font-bold text-slate-600">Registrando sua aprovação...</div>`;
+      await updateDoc(doc(db, COLECAO, id), {
+        status: "LIBERADO",
+        aprovadoEm: new Date().toLocaleString("pt-BR"),
+        aprovadoPor: "Cliente via Link WhatsApp"
+      });
+      box.innerHTML = `
+        <div class="bg-emerald-50 border-2 border-emerald-500 text-emerald-950 rounded-2xl p-5 text-center">
+          <div class="text-3xl mb-1">✅</div>
+          <p class="font-black text-lg">Pedido Aprovado com Sucesso!</p>
+          <p class="text-xs mt-1 text-emerald-800">A equipe da fábrica em Turmalina-MG já recebeu a liberação automática para iniciar sua peça.</p>
+        </div>`;
+    };
 
-    if (pendentes.length === 0) {
-      divCliente.innerHTML = `<div class="box vazio">Nenhum pedido aguardando aprovação no momento.</div>`;
-    } else {
-      divCliente.innerHTML = pendentes.map(p => {
-        const linkSite = window.location.href.split("?")[0];
-        const textoZap = encodeURIComponent(
-          `Olá ${p.cliente}! Confira seu pedido na *Metálica* (${p.id}):\n` +
-          `• Serviço: ${p.servico}\n• Material: ${p.material}\n• Medidas: ${p.medidas}\n\n` +
-          `Acesse o link e clique em Aprovar Medidas na aba 2:\n${linkSite}`
-        );
+    // =========================================================
+    // CONTROLES DE SELEÇÃO PADRONIZADA (PAINEL RESPONSÁVEL)
+    // =========================================================
+    window.selecionarTipoPeca = function(tipo, procsSugeridos, btn) {
+      selecao.tipoPeca = tipo;
+      document.querySelectorAll(".opt-peca").forEach(b => b.classList.remove("opt-active"));
+      btn.classList.add("opt-active");
+
+      selecao.processos = [...procsSugeridos];
+      document.querySelectorAll(".opt-proc").forEach(b => {
+        if (procsSugeridos.includes(b.dataset.proc)) b.classList.add("opt-active");
+        else b.classList.remove("opt-active");
+      });
+    };
+
+    window.toggleProcesso = function(btn) {
+      const p = btn.dataset.proc;
+      if (selecao.processos.includes(p)) {
+        selecao.processos = selecao.processos.filter(x => x !== p);
+        btn.classList.remove("opt-active");
+      } else {
+        selecao.processos.push(p);
+        btn.classList.add("opt-active");
+      }
+    };
+
+    window.selecionarUnico = function(grupo, valor, btn) {
+      selecao[grupo] = valor;
+      const mapaClasse = {
+        material: ".opt-material",
+        pintura: ".opt-pintura",
+        logistica: ".opt-logistica",
+        estoque: ".opt-estoque"
+      };
+      const classeAtiva = grupo === "estoque" ? "opt-active-amber" : "opt-active";
+      document.querySelectorAll(mapaClasse[grupo]).forEach(b => b.classList.remove("opt-active", "opt-active-amber"));
+      btn.classList.add(classeAtiva);
+    };
+
+    window.selecionarEspessura = function(valor, btn) {
+      document.querySelectorAll(".opt-esp").forEach(b => b.classList.remove("opt-active"));
+      btn.classList.add("opt-active");
+      const inpOutra = document.getElementById("inpOutraEspessura");
+      if (valor === "OUTRA") {
+        selecao.espessura = "OUTRA";
+        inpOutra.classList.remove("hidden");
+        inpOutra.focus();
+      } else {
+        selecao.espessura = valor;
+        inpOutra.classList.add("hidden");
+      }
+    };
+
+    // =========================================================
+    // CANVAS CROQUI
+    // =========================================================
+    const canvas = document.getElementById("canvasCroqui");
+    const ctx = canvas ? canvas.getContext("2d") : null;
+    let desenhando = false;
+    let temDesenho = false;
+
+    function prepararCanvas() {
+      if (!ctx) return;
+      ctx.fillStyle = "#f8fafc";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = "#e2e8f0";
+      ctx.lineWidth = 1;
+      for (let x = 20; x < canvas.width; x += 20) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+      }
+      for (let y = 20; y < canvas.height; y += 20) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+      }
+      ctx.strokeStyle = "#0f172a";
+      ctx.lineWidth = 3;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+    }
+    prepararCanvas();
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.touches ? e.touches[0] : e;
+      return {
+        x: (touch.clientX - rect.left) * (canvas.width / rect.width),
+        y: (touch.clientY - rect.top) * (canvas.height / rect.height)
+      };
+    }
+
+    if (canvas) {
+      canvas.addEventListener("mousedown", (e) => { desenhando = true; temDesenho = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+      canvas.addEventListener("mousemove", (e) => { if (!desenhando) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
+      window.addEventListener("mouseup", () => { desenhando = false; });
+
+      canvas.addEventListener("touchstart", (e) => { e.preventDefault(); desenhando = true; temDesenho = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }, { passive: false });
+      canvas.addEventListener("touchmove", (e) => { e.preventDefault(); if (!desenhando) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }, { passive: false });
+      canvas.addEventListener("touchend", () => { desenhando = false; });
+    }
+
+    window.limparCroqui = function() {
+      temDesenho = false;
+      prepararCanvas();
+    };
+
+    // =========================================================
+    // SALVAR PEDIDO NO FIREBASE
+    // =========================================================
+    window.salvarPedido = async function() {
+      const cliente = document.getElementById("inpCliente").value.trim();
+      const telefone = document.getElementById("inpTelefone").value.trim();
+      const prazo = document.getElementById("inpPrazo").value;
+      const valor = document.getElementById("inpValor").value.trim() || "A combinar";
+      const qtd = document.getElementById("inpQtd").value || "1";
+      const comp = document.getElementById("inpComp").value.trim();
+      const larg = document.getElementById("inpLarg").value.trim();
+      const dobra = document.getElementById("inpDobra").value.trim();
+      const obsTecnica = document.getElementById("inpObsTecnica").value.trim();
+      const atendente = document.getElementById("inpAtendente").value.trim() || "Escritório";
+      const obsInterna = document.getElementById("inpObsInterna").value.trim();
+
+      let espessuraFinal = selecao.espessura;
+      if (espessuraFinal === "OUTRA") {
+        espessuraFinal = document.getElementById("inpOutraEspessura").value.trim();
+      }
+
+      if (!cliente) return avisar("⚠️ Informe o nome do cliente.");
+      if (!selecao.tipoPeca) return avisar("⚠️ Selecione o Tipo de Serviço / Peça.");
+      if (selecao.processos.length === 0) return avisar("⚠️ Selecione pelo menos uma etapa na fábrica.");
+      if (!selecao.material) return avisar("⚠️ Selecione a matéria-prima (Aço 1020, 1045, Inox 304 ou Galvanizado).");
+      if (!espessuraFinal) return avisar("⚠️ Selecione a espessura / bitola.");
+
+      let partesMedida = [`${qtd} pç(s)`];
+      if (comp) partesMedida.push(`Comp: ${comp}mm`);
+      if (larg) partesMedida.push(`Larg/Alt: ${larg}mm`);
+      if (dobra) partesMedida.push(`Dobra: ${dobra}mm`);
+      const medidasResumo = partesMedida.join(" • ");
+
+      const btn = document.getElementById("btnSalvar");
+      btn.disabled = true;
+      btn.textContent = "SALVANDO NA NUVEM...";
+
+      const numeroOS = "OS-" + String(Math.floor(1000 + Math.random() * 9000));
+      const croquiData = temDesenho ? canvas.toDataURL("image/png") : "";
+
+      try {
+        const docRef = await addDoc(collection(db, COLECAO), {
+          numeroOS,
+          cliente,
+          telefone,
+          prazo,
+          valor,
+          logistica: selecao.logistica,
+          tipoPeca: selecao.tipoPeca,
+          processos: selecao.processos,
+          material: selecao.material,
+          espessura: espessuraFinal,
+          pintura: selecao.pintura,
+          qtd,
+          comp,
+          larg,
+          dobra,
+          medidasResumo,
+          obsTecnica,
+          croqui: croquiData,
+          // Dados exclusivos internos
+          atendente,
+          estoque: selecao.estoque,
+          obsInterna,
+          status: "AGUARDANDO",
+          criadoEmMs: Date.now(),
+          criadoEm: serverTimestamp()
+        });
+
+        const baseUrl = window.location.origin + window.location.pathname;
+        const linkCliente = `${baseUrl}?assinar=${docRef.id}`;
+
+        const textoWhats =
+          `*METÁLICA • TURMALINA-MG*\n` +
+          `*Pedido:* ${numeroOS} | *Cliente:* ${cliente}\n` +
+          `*Peça:* ${selecao.tipoPeca}\n` +
+          `*Material:* ${selecao.material} (${espessuraFinal})\n` +
+          `*Medidas:* ${medidasResumo}\n` +
+          `*Pintura:* ${selecao.pintura} | *Entrega:* ${selecao.logistica}\n` +
+          `*Prazo:* ${formatarData(prazo)} | *Valor:* R$ ${valor}\n\n` +
+          `✅ *Confira o desenho e aprove seu pedido no link:*\n${linkCliente}`;
+
+        try { await navigator.clipboard.writeText(textoWhats); } catch (_) {}
+
+        // Limpa formulário
+        document.getElementById("inpCliente").value = "";
+        document.getElementById("inpTelefone").value = "";
+        document.getElementById("inpValor").value = "";
+        document.getElementById("inpQtd").value = "1";
+        document.getElementById("inpComp").value = "";
+        document.getElementById("inpLarg").value = "";
+        document.getElementById("inpDobra").value = "";
+        document.getElementById("inpObsTecnica").value = "";
+        document.getElementById("inpObsInterna").value = "";
+        document.getElementById("inpOutraEspessura").value = "";
+        document.getElementById("inpOutraEspessura").classList.add("hidden");
+        limparCroqui();
+
+        avisar("✅ OS salva! Link de aprovação do cliente copiado pro WhatsApp.");
+        mudarAba("fabrica");
+      } catch (e) {
+        console.error(e);
+        avisar("❌ Erro ao salvar. Verifique as regras do Firestore.");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<span>SALVAR OS & COPIAR LINK DO CLIENTE</span>`;
+      }
+    };
+
+    // =========================================================
+    // RENDERIZAÇÃO DA FILA DA FÁBRICA (VISÃO DO RESPONSÁVEL)
+    // =========================================================
+    function renderizarLista() {
+      const cont = document.getElementById("listaPedidos");
+      const filtrados = filtroAtual === "TODOS" ? pedidos : pedidos.filter(p => p.status === filtroAtual);
+
+      if (filtrados.length === 0) {
+        cont.innerHTML = `<div class="bg-white rounded-2xl p-8 text-center text-slate-500 font-semibold border border-slate-200">Nenhum pedido nesta fila.</div>`;
+        return;
+      }
+
+      cont.innerHTML = filtrados.map(p => {
+        let selo = `<span class="bg-amber-100 text-amber-900 border border-amber-300 px-3 py-1 rounded-full text-xs font-black">⏳ AGUARDANDO CLIENTE</span>`;
+        let borda = "border-amber-300";
+
+        if (p.status === "LIBERADO") {
+          selo = `<span class="bg-emerald-100 text-emerald-900 border border-emerald-300 px-3 py-1 rounded-full text-xs font-black">🟢 LIBERADO PRA PRODUZIR</span>`;
+          borda = "border-emerald-500";
+        } else if (p.status === "ALTERACAO") {
+          selo = `<span class="bg-red-600 text-white px-3 py-1 rounded-full text-xs font-black">🚨 CLIENTE PEDIU ALTERAÇÃO — PARAR!</span>`;
+          borda = "border-red-600 alerta-alteracao";
+        } else if (p.status === "PRONTO") {
+          selo = `<span class="bg-blue-100 text-blue-900 border border-blue-300 px-3 py-1 rounded-full text-xs font-black">🏁 PRONTO / ENTREGA</span>`;
+          borda = "border-blue-300 opacity-85";
+        }
+
+        const linkCliente = `${window.location.origin}${window.location.pathname}?assinar=${p.id}`;
+
         return `
-          <div class="pedido-card pendente">
-            <span class="badge">${p.id} • Aguardando Cliente</span>
-            <h3 style="margin:4px 0">${p.cliente}</h3>
-            <p><strong>Serviço:</strong> ${p.servico}<br>
-            <strong>Material:</strong> ${p.material}<br>
-            <strong>Especificação:</strong> ${p.medidas}</p>
-            ${p.foto ? `<img src="${p.foto}" class="croqui-img" alt="Croqui">` : ""}
-            <a href="https://wa.me/55${p.whatsapp}?text=${textoZap}" target="_blank" class="btn btn-azul">
-              1. Enviar Link no WhatsApp
-            </a>
-            <button onclick="aprovarPedido('${p.docId}', '${p.id}')" class="btn btn-verde">
-              2. ✅ Aprovar Medidas (Liberar Fábrica)
-            </button>
+          <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border-2 ${borda} space-y-3">
+            <!-- TOPO CARD -->
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-black text-blue-800 bg-blue-50 px-2 py-0.5 rounded">${esc(p.numeroOS)}</span>
+                  <span class="text-xs font-bold text-slate-500">Prazo: ${formatarData(p.prazo)}</span>
+                  <span class="text-xs font-bold text-slate-500">• ${esc(p.logistica || 'Retira')}</span>
+                </div>
+                <h3 class="text-lg font-black text-slate-900 mt-0.5">${esc(p.cliente)}</h3>
+              </div>
+              <div>${selo}</div>
+            </div>
+
+            <!-- FICHA TÉCNICA PADRONIZADA -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+              <div class="bg-slate-50 p-2 rounded-lg border border-slate-200">
+                <span class="block text-[10px] font-bold uppercase text-slate-400">Peça</span>
+                <strong class="text-slate-900">${esc(p.tipoPeca || '-')}</strong>
+              </div>
+              <div class="bg-slate-50 p-2 rounded-lg border border-slate-200">
+                <span class="block text-[10px] font-bold uppercase text-slate-400">Material / Bitola</span>
+                <strong class="text-blue-950">${esc(p.material)} • ${esc(p.espessura || '-')}</strong>
+              </div>
+              <div class="bg-slate-50 p-2 rounded-lg border border-slate-200">
+                <span class="block text-[10px] font-bold uppercase text-slate-400">Etapas</span>
+                <strong class="text-slate-900">${(p.processos || []).join(" + ")}</strong>
+              </div>
+              <div class="bg-slate-50 p-2 rounded-lg border border-slate-200">
+                <span class="block text-[10px] font-bold uppercase text-slate-400">Pintura / Valor</span>
+                <strong class="text-slate-900">${esc(p.pintura || 'Sem')} • R$ ${esc(p.valor)}</strong>
+              </div>
+            </div>
+
+            <!-- MEDIDAS -->
+            <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-3 text-sm">
+              <span class="text-[10px] font-extrabold uppercase text-blue-700 block">Medidas Padrão</span>
+              <strong class="text-slate-900 text-base">${esc(p.medidasResumo)}</strong>
+              ${p.obsTecnica ? `<p class="text-xs text-slate-700 mt-1 font-medium">Obs. Cliente/Técnica: ${esc(p.obsTecnica)}</p>` : ""}
+            </div>
+
+            <!-- CONTROLE INTERNO RESTRITO À FÁBRICA -->
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-2.5 text-xs flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <span class="font-extrabold text-amber-950 uppercase">[Interno]</span>
+                <span class="font-semibold text-amber-900">Atendente: ${esc(p.atendente || 'Escritório')} • Almoxarifado: <strong>${esc(p.estoque || 'Em Estoque')}</strong></span>
+                ${p.obsInterna ? `<div class="text-amber-950 font-bold mt-0.5">⚠️ Nota Fábrica: ${esc(p.obsInterna)}</div>` : ""}
+              </div>
+              <a href="${linkCliente}" target="_blank" class="bg-white border border-amber-300 text-amber-950 hover:bg-amber-100 font-extrabold px-2.5 py-1.5 rounded-lg">
+                👁️ Ver Tela do Cliente
+              </a>
+            </div>
+
+            ${p.croqui ? `<img src="${p.croqui}" class="w-full max-h-40 object-contain bg-slate-50 border border-slate-200 rounded-xl" />` : ""}
+
+            <!-- BOTÕES DE CONTROLE DO RESPONSÁVEL -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+              ${p.status === "AGUARDANDO" ? `
+                <button onclick="mudarStatus('${p.id}', 'LIBERADO')" class="col-span-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-3 px-3 rounded-xl">
+                  ✅ Aprovar Manualmente
+                </button>` : ""}
+
+              ${p.status === "LIBERADO" ? `
+                <button onclick="mudarStatus('${p.id}', 'ALTERACAO')" class="bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs py-3 px-2 rounded-xl">
+                  🚨 Pediu Alteração
+                </button>
+                <button onclick="mudarStatus('${p.id}', 'PRONTO')" class="bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs py-3 px-2 rounded-xl">
+                  🏁 Concluir Peça
+                </button>` : ""}
+
+              ${p.status === "ALTERACAO" ? `
+                <button onclick="mudarStatus('${p.id}', 'LIBERADO')" class="col-span-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-3 px-3 rounded-xl">
+                  ✅ Nova Medida Validada • Retomar
+                </button>` : ""}
+
+              <button onclick="copiarLinkZap('${p.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs py-3 px-2 rounded-xl">
+                📲 Copiar Link Zap
+              </button>
+              <button onclick="imprimirOS('${p.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs py-3 px-2 rounded-xl">
+                🖨️ Imprimir OS
+              </button>
+              <button onclick="excluirOS('${p.id}')" class="bg-red-50 hover:bg-red-100 text-red-700 font-extrabold text-xs py-3 px-2 rounded-xl">
+                🗑️ Excluir
+              </button>
+            </div>
           </div>
         `;
       }).join("");
     }
 
-    const producao = pedidosCache.filter(p => p.status === "aprovado" || p.status === "concluido");
-    const divFabrica = document.getElementById("lista-fabrica");
+    // =========================================================
+    // AÇÕES DO RESPONSÁVEL
+    // =========================================================
+    window.mudarStatus = async function(id, novoStatus) {
+      await updateDoc(doc(db, COLECAO, id), { status: novoStatus });
+      avisar("Status atualizado na nuvem!");
+    };
 
-    if (producao.length === 0) {
-      divFabrica.innerHTML = `<div class="box vazio">Nenhum pedido aprovado para produção ainda.</div>`;
-    } else {
-      divFabrica.innerHTML = producao.map(p => `
-        <div class="pedido-card ${p.status}">
-          <span class="badge">${p.id} • ${p.status === "aprovado" ? "LIBERADO P/ PRODUÇÃO" : "CONCLUÍDO"}</span>
-          <h3 style="margin:4px 0">${p.cliente}</h3>
-          <p><strong>Serviço:</strong> ${p.servico}<br>
-          <strong>Material:</strong> ${p.material}<br>
-          <strong>Medidas:</strong> ${p.medidas}<br>
-          <small style="color:#16a34a">✔ Aprovado pelo cliente às ${p.dataAprovacao}</small></p>
-          ${p.foto ? `<img src="${p.foto}" class="croqui-img" alt="Croqui">` : ""}
-          ${p.status === "aprovado"
-            ? `<button onclick="concluirPedido('${p.docId}')" class="btn btn-verde">✅ Concluir Peça</button>`
-            : `<button onclick="window.print()" class="btn btn-cinza">Imprimir Ficha</button>`
-          }
+    window.excluirOS = async function(id) {
+      if (!confirm("Deseja realmente excluir esta OS?")) return;
+      await deleteDoc(doc(db, COLECAO, id));
+      avisar("OS excluída.");
+    };
+
+    window.copiarLinkZap = async function(id) {
+      const p = pedidos.find(x => x.id === id);
+      if (!p) return;
+      const link = `${window.location.origin}${window.location.pathname}?assinar=${p.id}`;
+      const txt =
+        `*METÁLICA • TURMALINA-MG*\n` +
+        `*Pedido:* ${p.numeroOS} | *Cliente:* ${p.cliente}\n` +
+        `*Peça:* ${p.tipoPeca} | *Material:* ${p.material} (${p.espessura})\n` +
+        `*Medidas:* ${p.medidasResumo}\n` +
+        `*Prazo:* ${formatarData(p.prazo)} | *Valor:* R$ ${p.valor}\n\n` +
+        `✅ *Confira e aprove seu pedido aqui:*\n${link}`;
+      await navigator.clipboard.writeText(txt);
+      avisar("Link exclusivo do cliente copiado!");
+    };
+
+    window.imprimirOS = function(id) {
+      const p = pedidos.find(x => x.id === id);
+      if (!p) return;
+      const area = document.getElementById("areaImpressao");
+      area.classList.remove("hidden");
+      area.innerHTML = `
+        <div style="border:2px solid #000; padding:18px; font-family:Arial,sans-serif;">
+          <div style="display:flex; justify-content:space-between; border-bottom:2px solid #000; padding-bottom:8px;">
+            <div>
+              <strong style="font-size:20px;">METÁLICA • ORDEM DE SERVIÇO</strong><br>
+              <span style="font-size:12px;">Turmalina-MG • Produção Sob Medida</span>
+            </div>
+            <div style="text-align:right;">
+              <strong style="font-size:20px;">${esc(p.numeroOS)}</strong><br>
+              <span style="font-size:12px;">Prazo: ${formatarData(p.prazo)}</span>
+            </div>
+          </div>
+
+          <p style="margin:10px 0; font-size:14px;">
+            <strong>Cliente:</strong> ${esc(p.cliente)} &nbsp;|&nbsp;
+            <strong>Logística:</strong> ${esc(p.logistica)} &nbsp;|&nbsp;
+            <strong>Status:</strong> ${esc(p.status)}
+          </p>
+
+          <table style="width:100%; border-collapse:collapse; font-size:13px; margin-bottom:10px;">
+            <tr>
+              <td style="border:1px solid #000; padding:6px;"><strong>Peça:</strong> ${esc(p.tipoPeca)}</td>
+              <td style="border:1px solid #000; padding:6px;"><strong>Material:</strong> ${esc(p.material)} (${esc(p.espessura)})</td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #000; padding:6px;"><strong>Etapas:</strong> ${(p.processos || []).join(" + ")}</td>
+              <td style="border:1px solid #000; padding:6px;"><strong>Pintura:</strong> ${esc(p.pintura)}</td>
+            </tr>
+            <tr>
+              <td colspan="2" style="border:1px solid #000; padding:8px; font-size:15px;">
+                <strong>Medidas:</strong> ${esc(p.medidasResumo)}
+              </td>
+            </tr>
+          </table>
+
+          ${p.obsTecnica ? `<p style="font-size:13px;"><strong>Obs. Técnica:</strong> ${esc(p.obsTecnica)}</p>` : ""}
+          ${p.obsInterna ? `<p style="font-size:13px;"><strong>Nota Interna Fábrica:</strong> ${esc(p.obsInterna)}</p>` : ""}
+          ${p.croqui ? `<div style="margin-top:10px;"><img src="${p.croqui}" style="max-width:100%; max-height:260px; border:1px solid #999;" /></div>` : ""}
+
+          <div style="margin-top:24px; display:flex; justify-content:space-between; font-size:12px;">
+            <div>_______________________________<br>Encarregado / Produção</div>
+            <div>_______________________________<br>Conferência Final</div>
+          </div>
         </div>
-      `).join("");
-    }
-  }
-</script>
+      `;
+      window.print();
+      setTimeout(() => area.classList.add("hidden"), 400);
+    };
 
+    window.mudarAba = function(aba) {
+      document.getElementById("telaNovo").classList.toggle("hidden", aba !== "novo");
+      document.getElementById("telaFabrica").classList.toggle("hidden", aba !== "fabrica");
+      document.getElementById("tabNovo").className = aba === "novo"
+        ? "py-3 px-3 rounded-xl font-extrabold text-sm sm:text-base bg-blue-600 text-white shadow"
+        : "py-3 px-3 rounded-xl font-extrabold text-sm sm:text-base bg-slate-800 text-slate-300 border border-slate-700";
+      document.getElementById("tabFabrica").className = aba === "fabrica"
+        ? "py-3 px-3 rounded-xl font-extrabold text-sm sm:text-base bg-blue-600 text-white shadow"
+        : "py-3 px-3 rounded-xl font-extrabold text-sm sm:text-base bg-slate-800 text-slate-300 border border-slate-700";
+    };
+
+    window.filtrar = function(f) {
+      filtroAtual = f;
+      document.querySelectorAll(".filtro-btn").forEach(b => {
+        b.className = "filtro-btn px-3 py-1.5 rounded-lg text-xs font-extrabold bg-slate-100 text-slate-700";
+      });
+      document.getElementById("f-" + f).className = "filtro-btn px-3 py-1.5 rounded-lg text-xs font-extrabold bg-slate-900 text-white";
+      renderizarLista();
+    };
+
+    function formatarData(iso) {
+      if (!iso || !iso.includes("-")) return iso || "-";
+      const [a, m, d] = iso.split("-");
+      return `${d}/${m}/${a}`;
+    }
+
+    function esc(str) {
+      return String(str || "").replace(/[&<>"']/g, m => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[m]));
+    }
+
+    function avisar(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.remove("opacity-0");
+      setTimeout(() => t.classList.add("opacity-0"), 3200);
+    }
+  </script>
 </body>
 </html>
