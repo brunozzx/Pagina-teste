@@ -50,6 +50,33 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
+        <!-- SININHO DE NOTIFICAÇÕES PRÓPRIAS DO SITE -->
+        <div class="relative">
+          <button id="btnSinoNotif" onclick="alternarPainelNotificacoes()"
+            class="relative bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white px-3 py-1.5 rounded-full text-xs font-extrabold flex items-center gap-1.5 transition">
+            <span>🔔</span>
+            <span class="hidden sm:inline">Avisos</span>
+            <span id="badgeNotifNaoLidas" class="hidden bg-red-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full animate-bounce">0</span>
+          </button>
+
+          <!-- DROPDOWN DA CENTRAL DE AVISOS -->
+          <div id="dropdownNotificacoes" class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white text-slate-900 rounded-2xl shadow-2xl border border-slate-200 z-50 overflow-hidden">
+            <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
+              <span class="text-xs font-black uppercase tracking-wider">🔔 Central de Notificações</span>
+              <button onclick="marcarTodasComoLidas()" class="text-[11px] font-bold text-amber-400 hover:underline">Limpar lidas</button>
+            </div>
+            <div id="bannerPermissaoPush" class="bg-blue-50 border-b border-blue-200 px-4 py-2.5 flex items-center justify-between gap-2">
+              <span class="text-[11px] font-bold text-blue-900">Ative alertas na tela do aparelho:</span>
+              <button onclick="solicitarPermissaoNotificacao()" class="bg-blue-700 hover:bg-blue-800 text-white text-[11px] font-extrabold px-2.5 py-1 rounded-lg shrink-0">
+                Ativar Alertas
+              </button>
+            </div>
+            <div id="listaNotificacoesSite" class="max-h-80 overflow-y-auto divide-y divide-slate-100 text-xs">
+              <div class="p-6 text-center text-slate-400 font-semibold">Nenhuma notificação nova no momento.</div>
+            </div>
+          </div>
+        </div>
+
         <!-- STATUS NUVEM -->
         <div id="badgeNuvem" class="flex items-center gap-1.5 bg-slate-900 border border-slate-700 px-2.5 py-1.5 rounded-full text-xs font-semibold text-amber-300">
           <span id="dotNuvem" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
@@ -64,7 +91,7 @@
 
         <!-- PERFIL DO CLIENTE LOGADO -->
         <div id="boxClienteLogadoTop" class="hidden flex items-center gap-1.5 bg-blue-950 border border-blue-700 px-3 py-1 rounded-full text-xs">
-          <span class="font-bold text-blue-200">👤 <span id="nomeClienteTop"></span></span>
+          <span class="font-bold text-blue-200">@<span id="usuarioClienteTop"></span></span>
           <button onclick="sairCliente()" class="text-red-300 hover:text-white font-black ml-1">Sair</button>
         </div>
 
@@ -86,6 +113,20 @@
       <span id="msgErroFirebase"></span>
     </div>
   </header>
+
+  <!-- BANNER FLUTUANTE DE NOTIFICAÇÃO EM TEMPO REAL -->
+  <div id="bannerAlertaTempoReal" class="hidden max-w-5xl mx-auto px-4 pt-3">
+    <div class="bg-emerald-950 text-white border-2 border-emerald-500 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-lg">
+      <div class="flex items-center gap-2.5">
+        <span class="text-xl">🔔</span>
+        <div>
+          <div id="tituloBannerTempoReal" class="text-xs sm:text-sm font-black text-emerald-300">Atualização no seu pedido!</div>
+          <div id="textoBannerTempoReal" class="text-xs text-slate-200"></div>
+        </div>
+      </div>
+      <button onclick="document.getElementById('bannerAlertaTempoReal').classList.add('hidden')" class="text-xs font-black bg-white/15 px-2.5 py-1 rounded-lg">OK</button>
+    </div>
+  </div>
 
   <!-- ========================================================= -->
   <!-- VISÃO 1: MARKETPLACE DO CLIENTE                           -->
@@ -243,7 +284,7 @@
       <div id="secCarrinho" class="bg-white rounded-2xl shadow-sm border-2 border-emerald-500/60 p-4 sm:p-5 space-y-4">
         <div class="flex items-center justify-between">
           <h3 class="text-base font-black text-slate-900">🛒 Itens no Seu Pedido (<span id="qtdCarrinhoTitulo">0</span>)</h3>
-          <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">Orçamento sem compromisso</span>
+          <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">Notificações direto no site</span>
         </div>
 
         <div id="listaCarrinho" class="space-y-2 text-sm text-slate-500">
@@ -258,7 +299,7 @@
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input id="cliNome" type="text" placeholder="Seu Nome ou Empresa *" class="w-full border-2 border-slate-300 focus:border-emerald-600 rounded-xl px-3.5 py-2.5 text-sm font-semibold outline-none" />
-            <input id="cliTelefone" type="tel" inputmode="numeric" maxlength="15" oninput="aplicarMascaraFone(this)" placeholder="WhatsApp: (38) 99999-9999 *" class="w-full border-2 border-slate-300 focus:border-emerald-600 rounded-xl px-3.5 py-2.5 text-sm font-semibold outline-none" />
+            <input id="cliTelefone" type="tel" inputmode="numeric" maxlength="15" oninput="aplicarMascaraFone(this)" placeholder="Telefone / WhatsApp (Opcional)" class="w-full border-2 border-slate-300 focus:border-emerald-600 rounded-xl px-3.5 py-2.5 text-sm font-semibold outline-none" />
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
@@ -287,23 +328,23 @@
 
       <div id="bannerClienteDeslogado" class="bg-blue-950 text-white rounded-2xl p-5 flex flex-wrap items-center justify-between gap-3 shadow">
         <div>
-          <h2 class="text-base font-black">Entre na sua conta para ver todos os seus pedidos salvos</h2>
-          <p class="text-xs text-blue-200 mt-0.5">Seus orçamentos e aprovações ficam salvos automaticamente no seu WhatsApp.</p>
+          <h2 class="text-base font-black">Entre com seu usuário para receber avisos em tempo real</h2>
+          <p class="text-xs text-blue-200 mt-0.5">Você será notificado aqui no site assim que o orçamento ou a peça ficar pronta.</p>
         </div>
         <div class="flex gap-2">
           <button onclick="abrirModalCliente('entrar')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl">
             Entrar
           </button>
           <button onclick="abrirModalCliente('cadastrar')" class="bg-white/15 hover:bg-white/25 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl">
-            Criar Conta Rápida
+            Criar Usuário
           </button>
         </div>
       </div>
 
       <div id="bannerClienteLogado" class="hidden bg-white rounded-2xl border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-2 shadow-sm">
         <div>
-          <span class="text-[10px] font-extrabold uppercase text-emerald-700">● Conta Conectada em Tempo Real</span>
-          <h2 class="text-base font-black text-slate-900">Pedidos de <span id="nomeClientePainel"></span> (<span id="foneClientePainel"></span>)</h2>
+          <span class="text-[10px] font-extrabold uppercase text-emerald-700">● Notificações Ativas em Tempo Real</span>
+          <h2 class="text-base font-black text-slate-900">Pedidos de <span id="nomeClientePainel"></span> <span class="text-xs font-bold text-blue-700">(@<span id="usuarioClientePainel"></span>)</span></h2>
         </div>
         <button onclick="mudarAbaCliente('vitrine')" class="bg-blue-900 text-white text-xs font-extrabold px-4 py-2 rounded-xl">
           + Novo Pedido
@@ -311,9 +352,9 @@
       </div>
 
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-2.5">
-        <label class="block text-xs font-extrabold uppercase text-slate-500">Consultar por código do pedido ou WhatsApp:</label>
+        <label class="block text-xs font-extrabold uppercase text-slate-500">Consultar por código do pedido ou nome de usuário:</label>
         <div class="flex gap-2">
-          <input id="inpBuscaPedido" type="text" placeholder="Ex: PED-4520 ou (38) 99999-9999"
+          <input id="inpBuscaPedido" type="text" placeholder="Ex: PED-4520 ou joaosilva"
             class="flex-1 border-2 border-slate-300 focus:border-blue-600 rounded-xl px-3.5 py-2 text-sm font-bold outline-none" />
           <button onclick="renderizarPedidosDoCliente()" class="bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs px-4 py-2 rounded-xl">
             Buscar
@@ -353,7 +394,7 @@
   </div>
 
   <!-- ========================================================= -->
-  <!-- MODAL LOGIN / CADASTRO DO CLIENTE                         -->
+  <!-- MODAL LOGIN / CADASTRO DO CLIENTE (POR USUÁRIO)           -->
   <!-- ========================================================= -->
   <div id="modalCliente" class="hidden fixed inset-0 bg-slate-950/75 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
@@ -382,7 +423,14 @@
         </div>
 
         <div>
-          <label class="block text-xs font-bold uppercase text-slate-600 mb-1">WhatsApp com DDD *</label>
+          <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Nome de Usuário (Login) *</label>
+          <input id="cadCliUsuario" type="text" oninput="this.value = normalizarUsuario(this.value)" placeholder="Ex: joaosilva"
+            class="w-full border-2 border-slate-300 focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-sm font-semibold outline-none" />
+          <span class="text-[10px] text-slate-400">Letras minúsculas e números, sem espaços.</span>
+        </div>
+
+        <div id="campoTelefoneOpcional" class="hidden">
+          <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Telefone / WhatsApp <span class="text-slate-400 font-normal">(Opcional)</span></label>
           <input id="cadCliTelefone" type="tel" inputmode="numeric" maxlength="15" oninput="aplicarMascaraFone(this)" placeholder="(38) 99999-9999"
             class="w-full border-2 border-slate-300 focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-sm font-semibold outline-none" />
         </div>
@@ -462,10 +510,16 @@
     const COLECAO_CLIENTES = "clientes_metalica";
 
     let todosPedidos = [];
+    let statusAnteriorMap = null;
+    let notificacoesLocais = JSON.parse(localStorage.getItem("metalica_notifs") || "[]");
     let carrinho = [];
     let filtroRespAtual = "TODOS";
     let adminLogado = sessionStorage.getItem("metalica_admin") === "1";
     let clienteLogado = JSON.parse(localStorage.getItem("metalica_cliente") || "null");
+    if (clienteLogado && !clienteLogado.usuario) {
+      clienteLogado = null;
+      localStorage.removeItem("metalica_cliente");
+    }
     let modoModalCliente = "entrar";
     let enviarCarrinhoAposLogin = false;
 
@@ -483,8 +537,17 @@
     document.getElementById("cliPrazo").value = dPadrao.toISOString().split("T")[0];
 
     // =========================================================
-    // PADRONIZAÇÃO E MÁSCARA DE TELEFONE / WHATSAPP
+    // NORMALIZAÇÃO DE USUÁRIO E TELEFONE OPCIONAL
     // =========================================================
+    function normalizarUsuario(u) {
+      return String(u || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9._-]/g, "")
+        .slice(0, 25);
+    }
+
     function normalizarFone(f) {
       let d = String(f || "").replace(/\D/g, "");
       if (d.length >= 12 && d.startsWith("55")) d = d.slice(2);
@@ -504,6 +567,190 @@
       input.value = formatarFonePadrao(input.value);
     }
 
+    // =========================================================
+    // SISTEMA PRÓPRIO DE NOTIFICAÇÕES (SEM LIMITES)
+    // =========================================================
+    function tocarSomNotificacao() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.setValueAtTime(1174.66, ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.18, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.35);
+      } catch (_) {}
+    }
+
+    function solicitarPermissaoNotificacao() {
+      if (!("Notification" in window)) {
+        return avisar("Este navegador não suporta notificações pop-up.");
+      }
+      Notification.requestPermission().then(perm => {
+        if (perm === "granted") {
+          document.getElementById("bannerPermissaoPush").classList.add("hidden");
+          avisar("🔔 Alertas na tela ativados!");
+          new Notification("Metálica Turmalina-MG", {
+            body: "Notificações ativadas! Você será avisado aqui sobre seus pedidos."
+          });
+        } else {
+          avisar("⚠️ Permissão de alerta negada no navegador.");
+        }
+      });
+    }
+
+    if ("Notification" in window && Notification.permission === "granted") {
+      document.getElementById("bannerPermissaoPush").classList.add("hidden");
+    }
+
+    function registrarNotificacaoSite(titulo, mensagem, numeroOS) {
+      const nova = {
+        id: Date.now() + Math.random(),
+        titulo,
+        mensagem,
+        numeroOS,
+        hora: new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
+        lida: false
+      };
+      notificacoesLocais.unshift(nova);
+      if (notificacoesLocais.length > 30) notificacoesLocais.pop();
+      localStorage.setItem("metalica_notifs", JSON.stringify(notificacoesLocais));
+      renderizarCentralNotificacoes();
+
+      document.getElementById("tituloBannerTempoReal").textContent = titulo;
+      document.getElementById("textoBannerTempoReal").textContent = mensagem;
+      document.getElementById("bannerAlertaTempoReal").classList.remove("hidden");
+
+      tocarSomNotificacao();
+
+      if ("Notification" in window && Notification.permission === "granted") {
+        const n = new Notification(titulo, { body: mensagem });
+        n.onclick = () => {
+          window.focus();
+          if (!adminLogado) mudarAbaCliente("meusPedidos");
+        };
+      }
+    }
+
+    function renderizarCentralNotificacoes() {
+      const badge = document.getElementById("badgeNotifNaoLidas");
+      const lista = document.getElementById("listaNotificacoesSite");
+      const naoLidas = notificacoesLocais.filter(n => !n.lida).length;
+
+      badge.textContent = naoLidas;
+      badge.classList.toggle("hidden", naoLidas === 0);
+
+      if (notificacoesLocais.length === 0) {
+        lista.innerHTML = `<div class="p-6 text-center text-slate-400 font-semibold">Nenhuma notificação nova no momento.</div>`;
+        return;
+      }
+
+      lista.innerHTML = notificacoesLocais.map(n => `
+        <div onclick="abrirPedidoDaNotificacao('${esc(n.numeroOS || "")}')"
+          class="p-3.5 cursor-pointer hover:bg-slate-50 transition ${n.lida ? 'opacity-70' : 'bg-blue-50/60'}">
+          <div class="flex items-center justify-between gap-2">
+            <strong class="text-slate-900">${esc(n.titulo)}</strong>
+            <span class="text-[10px] font-bold text-slate-400">${esc(n.hora)}</span>
+          </div>
+          <p class="text-slate-600 mt-0.5 leading-snug">${esc(n.mensagem)}</p>
+        </div>
+      `).join("");
+    }
+    renderizarCentralNotificacoes();
+
+    function alternarPainelNotificacoes() {
+      const drop = document.getElementById("dropdownNotificacoes");
+      drop.classList.toggle("hidden");
+      if (!drop.classList.contains("hidden")) {
+        notificacoesLocais = notificacoesLocais.map(n => ({ ...n, lida: true }));
+        localStorage.setItem("metalica_notifs", JSON.stringify(notificacoesLocais));
+        renderizarCentralNotificacoes();
+      }
+    }
+
+    function marcarTodasComoLidas() {
+      notificacoesLocais = [];
+      localStorage.setItem("metalica_notifs", "[]");
+      renderizarCentralNotificacoes();
+    }
+
+    function abrirPedidoDaNotificacao(numeroOS) {
+      document.getElementById("dropdownNotificacoes").classList.add("hidden");
+      if (!adminLogado) {
+        if (numeroOS) document.getElementById("inpBuscaPedido").value = numeroOS;
+        mudarAbaCliente("meusPedidos");
+      }
+    }
+
+    function detectarMudancasParaNotificar(pedidosAtuais) {
+      const novoMapa = {};
+      pedidosAtuais.forEach(p => {
+        novoMapa[p.id] = { status: p.status, valor: p.valor };
+      });
+
+      if (statusAnteriorMap !== null) {
+        pedidosAtuais.forEach(p => {
+          const ant = statusAnteriorMap[p.id];
+
+          if (adminLogado) {
+            if (!ant && p.status === "ORCAMENTO") {
+              registrarNotificacaoSite(
+                `🆕 Novo Pedido (${p.numeroOS})`,
+                `${p.cliente} (@${p.clienteId || "cliente"}) enviou um pedido para orçamento.`,
+                p.numeroOS
+              );
+            } else if (ant && ant.status !== "LIBERADO" && p.status === "LIBERADO") {
+              registrarNotificacaoSite(
+                `✅ Orçamento Aprovado (${p.numeroOS})`,
+                `${p.cliente} aprovou R$ ${p.valor}. Liberado para produção!`,
+                p.numeroOS
+              );
+            }
+            return;
+          }
+
+          const pertenceAoCliente = clienteLogado && p.clienteId === clienteLogado.usuario;
+          if (!pertenceAoCliente || !ant) return;
+
+          if (ant.status !== p.status) {
+            if (p.status === "AGUARDANDO") {
+              registrarNotificacaoSite(
+                `💰 Orçamento Pronto (${p.numeroOS})`,
+                `Valor fechado: R$ ${p.valor}. Clique para conferir e aprovar a fabricação.`,
+                p.numeroOS
+              );
+            } else if (p.status === "LIBERADO") {
+              registrarNotificacaoSite(
+                `🟢 Em Fabricação (${p.numeroOS})`,
+                `Seu pedido entrou na linha de produção da Metálica.`,
+                p.numeroOS
+              );
+            } else if (p.status === "ALTERACAO") {
+              registrarNotificacaoSite(
+                `🚨 Ajuste no Pedido (${p.numeroOS})`,
+                `A produção foi pausada para ajuste técnico.`,
+                p.numeroOS
+              );
+            } else if (p.status === "PRONTO") {
+              registrarNotificacaoSite(
+                `🏁 Pedido Finalizado (${p.numeroOS})!`,
+                `Suas peças estão prontas (${p.logistica}).`,
+                p.numeroOS
+              );
+            }
+          }
+        });
+      }
+
+      statusAnteriorMap = novoMapa;
+    }
+
     // LINK DIRETO (?pedido=PED-1234)
     const paramsUrl = new URLSearchParams(window.location.search);
     const pedidoLink = paramsUrl.get("pedido");
@@ -515,30 +762,31 @@
     }
 
     // =========================================================
-    // 2. CONTA E LOGIN DO CLIENTE
+    // 2. CONTA E LOGIN DO CLIENTE (IDENTIFICADOR: USUÁRIO)
     // =========================================================
     function atualizarUIClienteLogado() {
       if (clienteLogado) {
-        const fonePadrao = formatarFonePadrao(clienteLogado.telefoneLimpo || clienteLogado.telefoneFormatado);
         document.getElementById("btnLoginClienteTop").classList.add("hidden");
         document.getElementById("boxClienteLogadoTop").classList.remove("hidden");
-        document.getElementById("nomeClienteTop").textContent = clienteLogado.nome.split(" ")[0];
+        document.getElementById("usuarioClienteTop").textContent = clienteLogado.usuario;
 
         document.getElementById("bannerClienteDeslogado").classList.add("hidden");
         document.getElementById("bannerClienteLogado").classList.remove("hidden");
         document.getElementById("nomeClientePainel").textContent = clienteLogado.nome;
-        document.getElementById("foneClientePainel").textContent = fonePadrao;
+        document.getElementById("usuarioClientePainel").textContent = clienteLogado.usuario;
 
         document.getElementById("cliNome").value = clienteLogado.nome;
-        document.getElementById("cliTelefone").value = fonePadrao;
-        document.getElementById("avisoContaCarrinho").textContent = "✓ Pedido será salvo na sua conta";
+        if (clienteLogado.telefone) {
+          document.getElementById("cliTelefone").value = formatarFonePadrao(clienteLogado.telefone);
+        }
+        document.getElementById("avisoContaCarrinho").textContent = `✓ Conectado como @${clienteLogado.usuario}`;
       } else {
         document.getElementById("btnLoginClienteTop").classList.remove("hidden");
         document.getElementById("boxClienteLogadoTop").classList.add("hidden");
 
         document.getElementById("bannerClienteDeslogado").classList.remove("hidden");
         document.getElementById("bannerClienteLogado").classList.add("hidden");
-        document.getElementById("avisoContaCarrinho").textContent = "Faça login ou crie conta para salvar o histórico";
+        document.getElementById("avisoContaCarrinho").textContent = "Crie um usuário rápido para receber alertas";
       }
       renderizarPedidosDoCliente();
     }
@@ -560,12 +808,14 @@
       if (modo === "cadastrar") {
         document.getElementById("tituloModalCliente").textContent = "Criar Minha Conta";
         document.getElementById("campoNomeCadastro").classList.remove("hidden");
+        document.getElementById("campoTelefoneOpcional").classList.remove("hidden");
         document.getElementById("btnSubmeterCliente").textContent = "CADASTRAR E CONTINUAR";
         document.getElementById("btnModoCadastrarCli").className = "py-2 rounded-lg text-xs font-extrabold bg-white text-blue-900 shadow-sm";
         document.getElementById("btnModoEntrarCli").className = "py-2 rounded-lg text-xs font-extrabold text-slate-600";
       } else {
         document.getElementById("tituloModalCliente").textContent = "Entrar na Minha Conta";
         document.getElementById("campoNomeCadastro").classList.add("hidden");
+        document.getElementById("campoTelefoneOpcional").classList.add("hidden");
         document.getElementById("btnSubmeterCliente").textContent = "ENTRAR E VER MEUS PEDIDOS";
         document.getElementById("btnModoEntrarCli").className = "py-2 rounded-lg text-xs font-extrabold bg-white text-blue-900 shadow-sm";
         document.getElementById("btnModoCadastrarCli").className = "py-2 rounded-lg text-xs font-extrabold text-slate-600";
@@ -575,14 +825,14 @@
     async function submeterContaCliente(e) {
       e.preventDefault();
       const nome = document.getElementById("cadCliNome").value.trim();
-      const foneLimpo = normalizarFone(document.getElementById("cadCliTelefone").value);
-      const foneFormatado = formatarFonePadrao(foneLimpo);
+      const usuario = normalizarUsuario(document.getElementById("cadCliUsuario").value);
+      const telefoneOpc = formatarFonePadrao(document.getElementById("cadCliTelefone").value);
       const senha = document.getElementById("cadCliSenha").value.trim();
       const errBox = document.getElementById("erroClienteBox");
       const btn = document.getElementById("btnSubmeterCliente");
 
-      if (foneLimpo.length < 10) {
-        errBox.textContent = "Digite o DDD + número completo (Ex: (38) 99999-9999).";
+      if (usuario.length < 3) {
+        errBox.textContent = "O usuário deve ter pelo menos 3 caracteres (letras ou números).";
         errBox.classList.remove("hidden");
         return;
       }
@@ -597,7 +847,7 @@
       errBox.classList.add("hidden");
 
       try {
-        const docRef = db.collection(COLECAO_CLIENTES).doc(foneLimpo);
+        const docRef = db.collection(COLECAO_CLIENTES).doc(usuario);
         const docSnap = await docRef.get();
 
         if (modoModalCliente === "cadastrar") {
@@ -607,14 +857,14 @@
             return;
           }
           if (docSnap.exists) {
-            errBox.textContent = "Este WhatsApp já tem cadastro. Clique em 'Já tenho conta' para entrar.";
+            errBox.textContent = "Este nome de usuário já está em uso. Escolha outro ou faça login.";
             errBox.classList.remove("hidden");
             return;
           }
           const dadosCliente = {
             nome,
-            telefoneLimpo: foneLimpo,
-            telefoneFormatado: foneFormatado,
+            usuario,
+            telefone: telefoneOpc || "",
             senha,
             criadoEmMs: Date.now()
           };
@@ -623,10 +873,10 @@
           localStorage.setItem("metalica_cliente", JSON.stringify(clienteLogado));
           fecharModalCliente();
           atualizarUIClienteLogado();
-          avisar(`✅ Conta criada! Bem-vindo(a), ${nome}!`);
+          avisar(`✅ Conta @${usuario} criada! Bem-vindo(a), ${nome}!`);
         } else {
           if (!docSnap.exists) {
-            errBox.textContent = "WhatsApp não encontrado. Clique em 'Criar conta nova'.";
+            errBox.textContent = "Usuário não encontrado. Clique em 'Criar conta nova'.";
             errBox.classList.remove("hidden");
             return;
           }
@@ -641,6 +891,10 @@
           fecharModalCliente();
           atualizarUIClienteLogado();
           avisar(`✅ Bem-vindo(a) de volta, ${dados.nome}!`);
+        }
+
+        if ("Notification" in window && Notification.permission === "default") {
+          Notification.requestPermission();
         }
 
         if (enviarCarrinhoAposLogin && carrinho.length > 0) {
@@ -709,6 +963,9 @@
         document.getElementById("loginSenha").value = "";
         fecharModalLoginEquipe();
         atualizarEstadoLoginEquipe();
+        if ("Notification" in window && Notification.permission === "default") {
+          Notification.requestPermission();
+        }
         avisar("✅ Bem-vindo ao painel da Metálica!");
       } else {
         errBox.textContent = "Usuário ou senha incorretos. Use admin / admin.";
@@ -734,6 +991,8 @@
 
       todosPedidos = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
       todosPedidos.sort((a, b) => (b.criadoEmMs || 0) - (a.criadoEmMs || 0));
+
+      detectarMudancasParaNotificar(todosPedidos);
 
       document.getElementById("statNovos").textContent = todosPedidos.filter(p => p.status === "ORCAMENTO").length;
       document.getElementById("statProd").textContent = todosPedidos.filter(p => p.status === "LIBERADO").length;
@@ -868,20 +1127,19 @@
     async function finalizarPedidoMarketplace() {
       if (carrinho.length === 0) return avisar("⚠️ Adicione pelo menos uma peça ao carrinho antes de enviar.");
 
-      const foneDigitado = normalizarFone(document.getElementById("cliTelefone").value);
+      const nomeDigitado = document.getElementById("cliNome").value.trim();
+      const foneDigitado = formatarFonePadrao(document.getElementById("cliTelefone").value);
+
       if (!clienteLogado) {
-        document.getElementById("cadCliNome").value = document.getElementById("cliNome").value.trim();
-        document.getElementById("cadCliTelefone").value = formatarFonePadrao(foneDigitado);
+        document.getElementById("cadCliNome").value = nomeDigitado;
+        document.getElementById("cadCliUsuario").value = normalizarUsuario(nomeDigitado);
+        document.getElementById("cadCliTelefone").value = foneDigitado;
         abrirModalCliente("cadastrar", true);
         return;
       }
 
-      if (foneDigitado && foneDigitado.length < 10) {
-        return avisar("⚠️ Informe o WhatsApp completo com DDD: (XX) XXXXX-XXXX.");
-      }
-
-      const cliente = document.getElementById("cliNome").value.trim() || clienteLogado.nome;
-      const telefone = formatarFonePadrao(foneDigitado || clienteLogado.telefoneLimpo);
+      const cliente = nomeDigitado || clienteLogado.nome;
+      const telefone = foneDigitado || clienteLogado.telefone || "";
       const prazo = document.getElementById("cliPrazo").value;
 
       const btn = document.getElementById("btnFinalizarPedidoCli");
@@ -893,7 +1151,7 @@
       try {
         await db.collection(COLECAO_PEDIDOS).add({
           numeroOS,
-          clienteId: clienteLogado.telefoneLimpo,
+          clienteId: clienteLogado.usuario,
           cliente,
           telefone,
           prazo,
@@ -907,7 +1165,7 @@
         carrinho = [];
         atualizarCarrinhoUI();
         mudarAbaCliente("meusPedidos");
-        avisar(`✅ Pedido ${numeroOS} enviado! Aguarde o orçamento da Metálica.`);
+        avisar(`✅ Pedido ${numeroOS} enviado! Você será avisado aqui assim que o orçamento sair.`);
       } catch (e) {
         alert("Erro ao enviar pedido: " + e.message);
       } finally {
@@ -927,23 +1185,17 @@
       let lista = [];
 
       if (termoBusca) {
-        const foneBusca = normalizarFone(termoBusca);
+        const termoUser = normalizarUsuario(termoBusca.replace(/^@/, ""));
         lista = todosPedidos.filter(p =>
           (p.numeroOS && p.numeroOS.toLowerCase().includes(termoBusca)) ||
-          (p.telefone && normalizarFone(p.telefone).includes(foneBusca) && foneBusca.length >= 4)
+          (p.clienteId && termoUser.length >= 2 && p.clienteId.includes(termoUser))
         );
       } else if (clienteLogado) {
-        lista = todosPedidos.filter(p =>
-          p.clienteId === clienteLogado.telefoneLimpo ||
-          normalizarFone(p.telefone) === clienteLogado.telefoneLimpo
-        );
+        lista = todosPedidos.filter(p => p.clienteId === clienteLogado.usuario);
       }
 
       if (clienteLogado) {
-        const meus = todosPedidos.filter(p =>
-          p.clienteId === clienteLogado.telefoneLimpo ||
-          normalizarFone(p.telefone) === clienteLogado.telefoneLimpo
-        );
+        const meus = todosPedidos.filter(p => p.clienteId === clienteLogado.usuario);
         badgeQtd.textContent = meus.length;
         badgeQtd.classList.toggle("hidden", meus.length === 0);
       } else {
@@ -952,7 +1204,7 @@
 
       if (lista.length === 0) {
         box.innerHTML = `<div class="bg-white rounded-2xl border border-slate-200 p-6 text-center text-sm text-slate-500 font-semibold">
-          ${clienteLogado ? "Você ainda não fez nenhum pedido. Clique em 'Fazer Pedido Sob Medida' acima." : "Entre na sua conta ou digite o código do pedido acima para acompanhar."}
+          ${clienteLogado ? "Você ainda não fez nenhum pedido. Clique em 'Fazer Pedido Sob Medida' acima." : "Entre com seu usuário ou digite o código do pedido acima para acompanhar."}
         </div>`;
         return;
       }
@@ -1017,79 +1269,8 @@
     }
 
     // =========================================================
-    // 7. PAINEL EXCLUSIVO DA EQUIPE + WHATSAPP (ORÇAMENTO & PRONTO)
+    // 7. PAINEL EXCLUSIVO DA EQUIPE (NOTIFICAÇÕES DIRETO NO SITE)
     // =========================================================
-    function gerarLinkWhatsAppPedido(p, valorOverride) {
-      const valorFinal = valorOverride || p.valor;
-      const baseUrl = window.location.href.split("?")[0];
-      const linkDireto = `${baseUrl}?pedido=${encodeURIComponent(p.numeroOS)}`;
-
-      const resumoPecas = (p.itens || [])
-        .map((it, i) => `${i + 1}. ${it.servico} (${it.material} - ${it.medidasResumo})`)
-        .join("\n");
-
-      const mensagem =
-        `Olá *${p.cliente}*! Aqui é da *Metálica (Turmalina-MG)*.\n\n` +
-        `Seu orçamento *${p.numeroOS}* já está pronto:\n` +
-        `${resumoPecas}\n\n` +
-        `💰 *Valor Fechado:* R$ ${valorFinal}\n` +
-        `📅 *Prazo:* ${formatarData(p.prazo)} (${p.logistica})\n\n` +
-        `✅ *Clique no link abaixo para conferir e aprovar a fabricação:*\n${linkDireto}`;
-
-      const foneLimpo = normalizarFone(p.telefone);
-      const urlZap = foneLimpo
-        ? `https://wa.me/55${foneLimpo}?text=${encodeURIComponent(mensagem)}`
-        : `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
-
-      return { urlZap, mensagem, linkDireto };
-    }
-
-    function gerarLinkWhatsAppFinalizado(p) {
-      const baseUrl = window.location.href.split("?")[0];
-      const linkDireto = `${baseUrl}?pedido=${encodeURIComponent(p.numeroOS)}`;
-
-      const resumoPecas = (p.itens || [])
-        .map((it, i) => `${i + 1}. ${it.servico} (${it.medidasResumo})`)
-        .join("\n");
-
-      const infoEntrega = p.logistica === "Entrega Metálica"
-        ? `🚚 *Modalidade:* Entrega pela Metálica (entraremos em contato para combinar o horário).`
-        : `🏭 *Modalidade:* Já disponível para retirada na Metálica (Turmalina-MG).`;
-
-      const mensagem =
-        `Olá *${p.cliente}*! Boas notícias da *Metálica (Turmalina-MG)*! 🏁\n\n` +
-        `Seu pedido *${p.numeroOS}* foi *FINALIZADO* e está pronto!\n` +
-        `${resumoPecas}\n\n` +
-        `${infoEntrega}\n` +
-        `💰 *Valor:* R$ ${p.valor}\n\n` +
-        `Confira os detalhes do pedido no link:\n${linkDireto}`;
-
-      const foneLimpo = normalizarFone(p.telefone);
-      const urlZap = foneLimpo
-        ? `https://wa.me/55${foneLimpo}?text=${encodeURIComponent(mensagem)}`
-        : `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
-
-      return { urlZap, mensagem };
-    }
-
-    function abrirWhatsAppPedido(id) {
-      const p = todosPedidos.find(x => x.id === id);
-      if (!p) return;
-      const { urlZap, mensagem } = p.status === "PRONTO"
-        ? gerarLinkWhatsAppFinalizado(p)
-        : gerarLinkWhatsAppPedido(p);
-      try { navigator.clipboard.writeText(mensagem); } catch (_) {}
-      window.open(urlZap, "_blank");
-    }
-
-    async function copiarLinkDiretoCliente(id) {
-      const p = todosPedidos.find(x => x.id === id);
-      if (!p) return;
-      const { linkDireto } = gerarLinkWhatsAppPedido(p);
-      try { await navigator.clipboard.writeText(linkDireto); } catch (_) {}
-      avisar("🔗 Link copiado: " + linkDireto);
-    }
-
     function renderizarPainelResponsavel() {
       const cont = document.getElementById("listaPedidosResponsavel");
       const lista = filtroRespAtual === "TODOS" ? todosPedidos : todosPedidos.filter(p => p.status === filtroRespAtual);
@@ -1117,6 +1298,9 @@
           borda = "border-blue-400";
         }
 
+        const foneTexto = p.telefone ? ` • Tel: ${esc(formatarFonePadrao(p.telefone))}` : "";
+        const userTexto = p.clienteId ? `@${esc(p.clienteId)}` : "Sem usuário";
+
         const itensHtml = (p.itens || []).map((it, idx) => `
           <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs space-y-1">
             <div class="flex justify-between">
@@ -1135,7 +1319,7 @@
               <div>
                 <span class="text-xs font-black text-blue-800 bg-blue-50 px-2 py-0.5 rounded">${esc(p.numeroOS)}</span>
                 <span class="text-xs font-bold text-slate-500 ml-1">Prazo: ${formatarData(p.prazo)} • ${esc(p.logistica)}</span>
-                <h3 class="text-lg font-black text-slate-900 mt-0.5">${esc(p.cliente)} <span class="text-xs font-semibold text-slate-500">(${esc(formatarFonePadrao(p.telefone))})</span></h3>
+                <h3 class="text-lg font-black text-slate-900 mt-0.5">${esc(p.cliente)} <span class="text-xs font-semibold text-slate-500">(${userTexto}${foneTexto})</span></h3>
               </div>
               <div>${selo}</div>
             </div>
@@ -1146,19 +1330,12 @@
                   class="flex-1 bg-white border-2 border-purple-400 rounded-lg px-3 py-2 text-base font-black text-emerald-700 outline-none" />
                 <button onclick="salvarPrecoEquipe('${p.id}')"
                   class="bg-purple-700 hover:bg-purple-800 text-white font-extrabold text-xs py-3 px-4 rounded-xl">
-                  💰 Salvar Preço & Abrir WhatsApp
+                  💰 Salvar Preço & Notificar no Site
                 </button>
               </div>` : `
               <div class="flex flex-wrap items-center justify-between gap-2 ${p.status === 'PRONTO' ? 'bg-blue-50 border-blue-200' : 'bg-emerald-50 border-emerald-200'} border px-3 py-2 rounded-xl">
                 <span class="text-xs font-extrabold ${p.status === 'PRONTO' ? 'text-blue-900' : 'text-emerald-900'}">Valor Fechado: R$ ${esc(p.valor)}</span>
-                <div class="flex gap-1.5">
-                  <button onclick="abrirWhatsAppPedido('${p.id}')" class="${p.status === 'PRONTO' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-emerald-600 hover:bg-emerald-700'} text-white text-xs font-extrabold px-3 py-1.5 rounded-lg">
-                    ${p.status === 'PRONTO' ? '📲 Avisar Cliente (Pedido Pronto)' : '📲 Enviar Orçamento no WhatsApp'}
-                  </button>
-                  <button onclick="copiarLinkDiretoCliente('${p.id}')" class="bg-white border border-slate-300 text-slate-800 text-xs font-extrabold px-2.5 py-1.5 rounded-lg">
-                    🔗 Copiar Link
-                  </button>
-                </div>
+                <span class="text-[11px] font-bold text-slate-600">🔔 Cliente notificado no painel</span>
               </div>`}
 
             <div class="space-y-2">${itensHtml}</div>
@@ -1167,7 +1344,7 @@
               ${p.status === "AGUARDANDO" ? `<button onclick="mudarStatusResp('${p.id}', 'LIBERADO')" class="col-span-2 bg-emerald-600 text-white font-extrabold text-xs py-3 px-3 rounded-xl">✅ Aprovar Manualmente</button>` : ""}
               ${p.status === "LIBERADO" ? `
                 <button onclick="mudarStatusResp('${p.id}', 'ALTERACAO')" class="bg-red-600 text-white font-extrabold text-xs py-3 px-2 rounded-xl">🚨 Pediu Alteração</button>
-                <button onclick="concluirEAvisarCliente('${p.id}')" class="bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs py-3 px-2 rounded-xl">🏁 Concluir & Avisar WhatsApp</button>` : ""}
+                <button onclick="mudarStatusResp('${p.id}', 'PRONTO')" class="bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs py-3 px-2 rounded-xl">🏁 Concluir Pedido</button>` : ""}
               ${p.status === "ALTERACAO" ? `<button onclick="mudarStatusResp('${p.id}', 'LIBERADO')" class="col-span-2 bg-emerald-600 text-white font-extrabold text-xs py-3 px-3 rounded-xl">✅ Retomar Produção</button>` : ""}
               <button onclick="imprimirOSResp('${p.id}')" class="bg-slate-100 text-slate-800 font-extrabold text-xs py-3 px-2 rounded-xl">🖨️ Imprimir OS</button>
               <button onclick="excluirOSResp('${p.id}')" class="bg-red-50 text-red-700 font-extrabold text-xs py-3 px-2 rounded-xl">🗑️ Excluir</button>
@@ -1180,36 +1357,13 @@
     async function salvarPrecoEquipe(id) {
       const val = document.getElementById("preco-" + id).value.trim();
       if (!val) return avisar("⚠️ Digite o valor fechado.");
-      const p = todosPedidos.find(x => x.id === id);
-
       await db.collection(COLECAO_PEDIDOS).doc(id).update({ valor: val, status: "AGUARDANDO" });
-      avisar("✅ Preço salvo! Abrindo WhatsApp do cliente...");
-
-      if (p) {
-        const { urlZap, mensagem } = gerarLinkWhatsAppPedido(p, val);
-        try { await navigator.clipboard.writeText(mensagem); } catch (_) {}
-        window.open(urlZap, "_blank");
-      }
-    }
-
-    async function concluirEAvisarCliente(id) {
-      const p = todosPedidos.find(x => x.id === id);
-      await db.collection(COLECAO_PEDIDOS).doc(id).update({
-        status: "PRONTO",
-        finalizadoEm: new Date().toLocaleString("pt-BR")
-      });
-      avisar("🏁 Pedido finalizado! Abrindo WhatsApp para avisar o cliente...");
-
-      if (p) {
-        const { urlZap, mensagem } = gerarLinkWhatsAppFinalizado(p);
-        try { await navigator.clipboard.writeText(mensagem); } catch (_) {}
-        window.open(urlZap, "_blank");
-      }
+      avisar("✅ Preço salvo! O cliente foi notificado automaticamente no site.");
     }
 
     async function mudarStatusResp(id, s) {
       await db.collection(COLECAO_PEDIDOS).doc(id).update({ status: s });
-      avisar("Status atualizado!");
+      avisar(s === "PRONTO" ? "🏁 Pedido finalizado! Cliente notificado no site." : "Status atualizado!");
     }
 
     async function excluirOSResp(id) {
@@ -1224,6 +1378,7 @@
       if (!p) return;
       const area = document.getElementById("areaImpressao");
       area.classList.remove("hidden");
+      const fonePrint = p.telefone ? ` • Tel: ${esc(formatarFonePadrao(p.telefone))}` : "";
       const itensPrint = (p.itens || []).map((it, i) => `
         <div style="border:1px solid #000; padding:8px; margin-bottom:8px;">
           <strong>${i + 1}. ${esc(it.servico)}</strong> — ${esc(it.material)} (${esc(it.espessura)})<br>
@@ -1234,7 +1389,7 @@
 
       area.innerHTML = `<div style="border:2px solid #000; padding:18px; font-family:Arial,sans-serif;">
         <h2>METÁLICA TURMALINA-MG • ${esc(p.numeroOS)}</h2>
-        <p><strong>Cliente:</strong> ${esc(p.cliente)} (${esc(formatarFonePadrao(p.telefone))}) | <strong>Prazo:</strong> ${formatarData(p.prazo)}</p>
+        <p><strong>Cliente:</strong> ${esc(p.cliente)} (@${esc(p.clienteId || "-")}${fonePrint}) | <strong>Prazo:</strong> ${formatarData(p.prazo)}</p>
         ${itensPrint}
       </div>`;
       window.print();
