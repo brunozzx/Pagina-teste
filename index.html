@@ -37,7 +37,7 @@
 <body class="bg-slate-100 text-slate-900 min-h-screen pb-16">
 
   <!-- ========================================================= -->
-  <!-- CABEÇALHO GERAL (VITRINE PÚBLICA + BOTÃO LOGIN EQUIPE)    -->
+  <!-- CABEÇALHO GERAL                                           -->
   <!-- ========================================================= -->
   <header class="bg-slate-950 text-white sticky top-0 z-30 shadow-md border-b border-slate-800">
     <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
@@ -49,34 +49,46 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2">
         <!-- STATUS NUVEM -->
         <div id="badgeNuvem" class="flex items-center gap-1.5 bg-slate-900 border border-slate-700 px-2.5 py-1.5 rounded-full text-xs font-semibold text-amber-300">
           <span id="dotNuvem" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
           <span id="txtNuvem">Conectando...</span>
         </div>
 
-        <!-- BOTÃO LOGIN / SAIR EQUIPE -->
-        <button id="btnToggleLogin" onclick="abrirModalLogin()"
-          class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 text-xs font-extrabold px-3 py-1.5 rounded-full transition">
-          🔒 Área da Equipe
+        <!-- BOTÃO LOGIN CLIENTE (QUANDO DESLOGADO) -->
+        <button id="btnLoginClienteTop" onclick="abrirModalCliente('entrar')"
+          class="bg-blue-700 hover:bg-blue-600 text-white text-xs font-extrabold px-3 py-1.5 rounded-full transition">
+          👤 Entrar / Criar Conta
         </button>
 
-        <button id="btnSairEquipe" onclick="sairDaConta()"
+        <!-- PERFIL DO CLIENTE LOGADO -->
+        <div id="boxClienteLogadoTop" class="hidden flex items-center gap-1.5 bg-blue-950 border border-blue-700 px-3 py-1 rounded-full text-xs">
+          <span class="font-bold text-blue-200">👤 <span id="nomeClienteTop"></span></span>
+          <button onclick="sairCliente()" class="text-red-300 hover:text-white font-black ml-1">Sair</button>
+        </div>
+
+        <!-- BOTÃO LOGIN EQUIPE -->
+        <button id="btnToggleLogin" onclick="abrirModalLoginEquipe()"
+          class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 text-xs font-extrabold px-3 py-1.5 rounded-full transition">
+          🔒 Equipe
+        </button>
+
+        <!-- SAIR EQUIPE -->
+        <button id="btnSairEquipe" onclick="sairDaContaEquipe()"
           class="hidden bg-red-600 hover:bg-red-700 text-white text-xs font-extrabold px-3 py-1.5 rounded-full transition">
           Sair (admin)
         </button>
       </div>
     </div>
 
-    <!-- AVISO DE ERRO FIREBASE -->
     <div id="alertaFirestore" class="hidden bg-red-600 text-white text-xs px-4 py-2 text-center font-medium">
       <span id="msgErroFirebase"></span>
     </div>
   </header>
 
   <!-- ========================================================= -->
-  <!-- VISÃO 1: MARKETPLACE PÚBLICO DO CLIENTE (SEM LOGIN)       -->
+  <!-- VISÃO 1: MARKETPLACE DO CLIENTE                           -->
   <!-- ========================================================= -->
   <div id="visaoMarketplace" class="max-w-5xl mx-auto px-4 pt-5 space-y-5">
 
@@ -86,8 +98,9 @@
         <button id="tabVitrine" onclick="mudarAbaCliente('vitrine')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-blue-900 text-white">
           🛠️ Fazer Pedido Sob Medida
         </button>
-        <button id="tabRastrear" onclick="mudarAbaCliente('rastrear')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-slate-100 text-slate-700 hover:bg-slate-200">
-          🔍 Acompanhar / Aprovar Pedido
+        <button id="tabMeusPedidos" onclick="mudarAbaCliente('meusPedidos')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center gap-1.5">
+          <span>📋 Meus Pedidos</span>
+          <span id="badgeQtdMeusPedidos" class="hidden bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full text-[11px] font-black">0</span>
         </button>
       </div>
 
@@ -153,7 +166,6 @@
           <h3 id="tituloServicoSel" class="text-lg font-black text-slate-900">Selecione um serviço acima para começar</h3>
         </div>
 
-        <!-- MATERIAL -->
         <div>
           <label class="block text-xs font-extrabold uppercase text-slate-600 mb-2">Material *</label>
           <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
@@ -165,7 +177,6 @@
           </div>
         </div>
 
-        <!-- ESPESSURA -->
         <div>
           <label class="block text-xs font-extrabold uppercase text-slate-600 mb-2">Espessura / Bitola</label>
           <div class="grid grid-cols-4 sm:grid-cols-8 gap-1.5">
@@ -181,7 +192,6 @@
           <input id="cfgOutraEsp" type="text" placeholder="Ex: Metalon 50x30 ou Viga U 4&quot;" class="hidden mt-2 w-full border-2 border-blue-400 rounded-xl px-3.5 py-2 text-sm font-semibold outline-none bg-blue-50/40" />
         </div>
 
-        <!-- PINTURA -->
         <div>
           <label class="block text-xs font-extrabold uppercase text-slate-600 mb-2">Acabamento / Pintura</label>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -192,7 +202,6 @@
           </div>
         </div>
 
-        <!-- MEDIDAS -->
         <div>
           <label class="block text-xs font-extrabold uppercase text-slate-600 mb-2">Quantidade e Medidas (em milímetros)</label>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -216,7 +225,6 @@
           <input id="cfgObs" type="text" placeholder="Detalhes da peça (furos, cor da tinta, encaixes...)" class="mt-2.5 w-full border-2 border-slate-300 focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-sm font-medium outline-none" />
         </div>
 
-        <!-- CROQUI -->
         <div>
           <div class="flex items-center justify-between mb-1.5">
             <label class="block text-xs font-extrabold uppercase text-slate-600">Desenho / Croqui Rápido (Opcional)</label>
@@ -243,10 +251,14 @@
         </div>
 
         <div class="border-t border-slate-200 pt-4 space-y-3">
-          <h4 class="text-xs font-extrabold uppercase text-slate-500">3. Seus Dados para Receber o Orçamento</h4>
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h4 class="text-xs font-extrabold uppercase text-slate-500">3. Identificação do Cliente</h4>
+            <span id="avisoContaCarrinho" class="text-xs font-bold text-blue-700"></span>
+          </div>
+
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input id="cliNome" type="text" placeholder="Seu Nome ou Empresa *" class="w-full border-2 border-slate-300 focus:border-emerald-600 rounded-xl px-3.5 py-2.5 text-sm font-semibold outline-none" />
-            <input id="cliTelefone" type="tel" placeholder="Seu WhatsApp * (Ex: 38 99999-9999)" class="w-full border-2 border-slate-300 focus:border-emerald-600 rounded-xl px-3.5 py-2.5 text-sm font-semibold outline-none" />
+            <input id="cliTelefone" type="tel" inputmode="numeric" maxlength="15" oninput="aplicarMascaraFone(this)" placeholder="WhatsApp: (38) 99999-9999 *" class="w-full border-2 border-slate-300 focus:border-emerald-600 rounded-xl px-3.5 py-2.5 text-sm font-semibold outline-none" />
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
@@ -270,15 +282,40 @@
       </div>
     </section>
 
-    <!-- SUB-TELA B: ACOMPANHAR & APROVAR PEDIDO -->
-    <section id="secRastrear" class="hidden space-y-4">
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-3">
-        <h2 class="text-base font-black text-slate-900">Acompanhar ou Aprovar Orçamento</h2>
-        <p class="text-xs text-slate-500">Digite o código do seu pedido (ex: <strong>PED-1234</strong>) ou o seu número de WhatsApp cadastrado.</p>
+    <!-- SUB-TELA B: MEUS PEDIDOS (HISTÓRICO DO CLIENTE LOGADO + BUSCA RÁPIDA) -->
+    <section id="secMeusPedidos" class="hidden space-y-4">
+
+      <div id="bannerClienteDeslogado" class="bg-blue-950 text-white rounded-2xl p-5 flex flex-wrap items-center justify-between gap-3 shadow">
+        <div>
+          <h2 class="text-base font-black">Entre na sua conta para ver todos os seus pedidos salvos</h2>
+          <p class="text-xs text-blue-200 mt-0.5">Seus orçamentos e aprovações ficam salvos automaticamente no seu WhatsApp.</p>
+        </div>
         <div class="flex gap-2">
-          <input id="inpBuscaPedido" type="text" placeholder="Ex: PED-4520 ou 38999999999"
-            class="flex-1 border-2 border-slate-300 focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-sm font-bold outline-none" />
-          <button onclick="buscarPedidosCliente()" class="bg-blue-900 hover:bg-blue-950 text-white font-extrabold text-sm px-5 py-2.5 rounded-xl">
+          <button onclick="abrirModalCliente('entrar')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl">
+            Entrar
+          </button>
+          <button onclick="abrirModalCliente('cadastrar')" class="bg-white/15 hover:bg-white/25 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl">
+            Criar Conta Rápida
+          </button>
+        </div>
+      </div>
+
+      <div id="bannerClienteLogado" class="hidden bg-white rounded-2xl border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-2 shadow-sm">
+        <div>
+          <span class="text-[10px] font-extrabold uppercase text-emerald-700">● Conta Conectada em Tempo Real</span>
+          <h2 class="text-base font-black text-slate-900">Pedidos de <span id="nomeClientePainel"></span> (<span id="foneClientePainel"></span>)</h2>
+        </div>
+        <button onclick="mudarAbaCliente('vitrine')" class="bg-blue-900 text-white text-xs font-extrabold px-4 py-2 rounded-xl">
+          + Novo Pedido
+        </button>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-2.5">
+        <label class="block text-xs font-extrabold uppercase text-slate-500">Consultar por código do pedido ou WhatsApp:</label>
+        <div class="flex gap-2">
+          <input id="inpBuscaPedido" type="text" placeholder="Ex: PED-4520 ou (38) 99999-9999"
+            class="flex-1 border-2 border-slate-300 focus:border-blue-600 rounded-xl px-3.5 py-2 text-sm font-bold outline-none" />
+          <button onclick="renderizarPedidosDoCliente()" class="bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs px-4 py-2 rounded-xl">
             Buscar
           </button>
         </div>
@@ -303,7 +340,6 @@
       </div>
     </div>
 
-    <!-- FILTROS DA EQUIPE -->
     <div class="flex flex-wrap gap-1.5 bg-white p-3 rounded-xl border border-slate-200">
       <button onclick="filtrarResp('TODOS')" id="fr-TODOS" class="fr-btn px-3 py-1.5 rounded-lg text-xs font-extrabold bg-slate-900 text-white">Todos</button>
       <button onclick="filtrarResp('ORCAMENTO')" id="fr-ORCAMENTO" class="fr-btn px-3 py-1.5 rounded-lg text-xs font-extrabold bg-purple-100 text-purple-900">🆕 Novos Pedidos</button>
@@ -317,22 +353,73 @@
   </div>
 
   <!-- ========================================================= -->
-  <!-- MODAL DE LOGIN SIMPLES (admin / admin)                    -->
+  <!-- MODAL LOGIN / CADASTRO DO CLIENTE                         -->
   <!-- ========================================================= -->
-  <div id="modalLogin" class="hidden fixed inset-0 bg-slate-950/75 z-50 flex items-center justify-center p-4">
-    <form onsubmit="fazerLogin(event)" class="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
+  <div id="modalCliente" class="hidden fixed inset-0 bg-slate-950/75 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
         <div>
-          <span class="text-[10px] font-extrabold uppercase text-blue-700">Acesso Restrito • Teste</span>
-          <h3 class="text-lg font-black text-slate-900">Login da Equipe Metálica</h3>
+          <span class="text-[10px] font-extrabold uppercase text-blue-700">Área do Cliente • Metálica</span>
+          <h3 id="tituloModalCliente" class="text-lg font-black text-slate-900">Entrar na Minha Conta</h3>
         </div>
-        <button type="button" onclick="fecharModalLogin()" class="text-slate-400 hover:text-slate-700 font-black text-lg">✕</button>
+        <button type="button" onclick="fecharModalCliente()" class="text-slate-400 hover:text-slate-700 font-black text-lg">✕</button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-xl">
+        <button type="button" id="btnModoEntrarCli" onclick="alternarModoCliente('entrar')" class="py-2 rounded-lg text-xs font-extrabold bg-white text-blue-900 shadow-sm">
+          Já tenho conta
+        </button>
+        <button type="button" id="btnModoCadastrarCli" onclick="alternarModoCliente('cadastrar')" class="py-2 rounded-lg text-xs font-extrabold text-slate-600">
+          Criar conta nova
+        </button>
+      </div>
+
+      <form onsubmit="submeterContaCliente(event)" class="space-y-3">
+        <div id="campoNomeCadastro" class="hidden">
+          <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Seu Nome ou Empresa *</label>
+          <input id="cadCliNome" type="text" placeholder="Ex: João Silva / Serralheria"
+            class="w-full border-2 border-slate-300 focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-sm font-semibold outline-none" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-600 mb-1">WhatsApp com DDD *</label>
+          <input id="cadCliTelefone" type="tel" inputmode="numeric" maxlength="15" oninput="aplicarMascaraFone(this)" placeholder="(38) 99999-9999"
+            class="w-full border-2 border-slate-300 focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-sm font-semibold outline-none" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Senha *</label>
+          <input id="cadCliSenha" type="password" placeholder="Crie ou digite sua senha"
+            class="w-full border-2 border-slate-300 focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-sm font-semibold outline-none" />
+        </div>
+
+        <div id="erroClienteBox" class="hidden text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-xl p-2.5"></div>
+
+        <button type="submit" id="btnSubmeterCliente"
+          class="w-full bg-blue-900 hover:bg-blue-950 text-white font-black text-sm py-3.5 rounded-xl shadow">
+          ENTRAR E VER MEUS PEDIDOS
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL DE LOGIN DA EQUIPE (admin / admin)                  -->
+  <!-- ========================================================= -->
+  <div id="modalLoginEquipe" class="hidden fixed inset-0 bg-slate-950/75 z-50 flex items-center justify-center p-4">
+    <form onsubmit="fazerLoginEquipe(event)" class="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-extrabold uppercase text-blue-700">Acesso Restrito • Equipe</span>
+          <h3 class="text-lg font-black text-slate-900">Login Administrativo</h3>
+        </div>
+        <button type="button" onclick="fecharModalLoginEquipe()" class="text-slate-400 hover:text-slate-700 font-black text-lg">✕</button>
       </div>
 
       <div class="space-y-3">
         <div>
           <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Usuário</label>
-          <input id="loginUsuario" type="text" placeholder="admin" value="admin"
+          <input id="loginUsuario" type="text" value="admin"
             class="w-full border-2 border-slate-300 focus:border-blue-600 rounded-xl px-3.5 py-2.5 text-sm font-semibold outline-none" />
         </div>
         <div>
@@ -371,12 +458,16 @@
       firebase.initializeApp(firebaseConfig);
     }
     const db = firebase.firestore();
-    const COLECAO = "pedidos_metalica";
+    const COLECAO_PEDIDOS = "pedidos_metalica";
+    const COLECAO_CLIENTES = "clientes_metalica";
 
     let todosPedidos = [];
     let carrinho = [];
     let filtroRespAtual = "TODOS";
     let adminLogado = sessionStorage.getItem("metalica_admin") === "1";
+    let clienteLogado = JSON.parse(localStorage.getItem("metalica_cliente") || "null");
+    let modoModalCliente = "entrar";
+    let enviarCarrinhoAposLogin = false;
 
     let itemAtual = {
       servico: "",
@@ -387,19 +478,203 @@
     };
     let logisticaCli = "Cliente Retira";
 
-    // Prazo padrão +3 dias
     const dPadrao = new Date();
     dPadrao.setDate(dPadrao.getDate() + 3);
     document.getElementById("cliPrazo").value = dPadrao.toISOString().split("T")[0];
 
     // =========================================================
-    // 2. LOGIN SIMPLES (admin / admin)
+    // PADRONIZAÇÃO E MÁSCARA DE TELEFONE / WHATSAPP
     // =========================================================
-    function atualizarEstadoLogin() {
+    function normalizarFone(f) {
+      let d = String(f || "").replace(/\D/g, "");
+      if (d.length >= 12 && d.startsWith("55")) d = d.slice(2);
+      return d.slice(0, 11);
+    }
+
+    function formatarFonePadrao(valor) {
+      const d = normalizarFone(valor);
+      if (!d) return "";
+      if (d.length <= 2) return `(${d}`;
+      if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+      if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+      return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7, 11)}`;
+    }
+
+    function aplicarMascaraFone(input) {
+      input.value = formatarFonePadrao(input.value);
+    }
+
+    // LINK DIRETO (?pedido=PED-1234)
+    const paramsUrl = new URLSearchParams(window.location.search);
+    const pedidoLink = paramsUrl.get("pedido");
+    if (pedidoLink) {
+      adminLogado = false;
+      sessionStorage.removeItem("metalica_admin");
+      document.getElementById("inpBuscaPedido").value = pedidoLink;
+      mudarAbaCliente("meusPedidos");
+    }
+
+    // =========================================================
+    // 2. CONTA E LOGIN DO CLIENTE
+    // =========================================================
+    function atualizarUIClienteLogado() {
+      if (clienteLogado) {
+        const fonePadrao = formatarFonePadrao(clienteLogado.telefoneLimpo || clienteLogado.telefoneFormatado);
+        document.getElementById("btnLoginClienteTop").classList.add("hidden");
+        document.getElementById("boxClienteLogadoTop").classList.remove("hidden");
+        document.getElementById("nomeClienteTop").textContent = clienteLogado.nome.split(" ")[0];
+
+        document.getElementById("bannerClienteDeslogado").classList.add("hidden");
+        document.getElementById("bannerClienteLogado").classList.remove("hidden");
+        document.getElementById("nomeClientePainel").textContent = clienteLogado.nome;
+        document.getElementById("foneClientePainel").textContent = fonePadrao;
+
+        document.getElementById("cliNome").value = clienteLogado.nome;
+        document.getElementById("cliTelefone").value = fonePadrao;
+        document.getElementById("avisoContaCarrinho").textContent = "✓ Pedido será salvo na sua conta";
+      } else {
+        document.getElementById("btnLoginClienteTop").classList.remove("hidden");
+        document.getElementById("boxClienteLogadoTop").classList.add("hidden");
+
+        document.getElementById("bannerClienteDeslogado").classList.remove("hidden");
+        document.getElementById("bannerClienteLogado").classList.add("hidden");
+        document.getElementById("avisoContaCarrinho").textContent = "Faça login ou crie conta para salvar o histórico";
+      }
+      renderizarPedidosDoCliente();
+    }
+
+    function abrirModalCliente(modo = "entrar", enviarDepois = false) {
+      enviarCarrinhoAposLogin = enviarDepois;
+      alternarModoCliente(modo);
+      document.getElementById("erroClienteBox").classList.add("hidden");
+      document.getElementById("modalCliente").classList.remove("hidden");
+    }
+
+    function fecharModalCliente() {
+      document.getElementById("modalCliente").classList.add("hidden");
+    }
+
+    function alternarModoCliente(modo) {
+      modoModalCliente = modo;
+      document.getElementById("erroClienteBox").classList.add("hidden");
+      if (modo === "cadastrar") {
+        document.getElementById("tituloModalCliente").textContent = "Criar Minha Conta";
+        document.getElementById("campoNomeCadastro").classList.remove("hidden");
+        document.getElementById("btnSubmeterCliente").textContent = "CADASTRAR E CONTINUAR";
+        document.getElementById("btnModoCadastrarCli").className = "py-2 rounded-lg text-xs font-extrabold bg-white text-blue-900 shadow-sm";
+        document.getElementById("btnModoEntrarCli").className = "py-2 rounded-lg text-xs font-extrabold text-slate-600";
+      } else {
+        document.getElementById("tituloModalCliente").textContent = "Entrar na Minha Conta";
+        document.getElementById("campoNomeCadastro").classList.add("hidden");
+        document.getElementById("btnSubmeterCliente").textContent = "ENTRAR E VER MEUS PEDIDOS";
+        document.getElementById("btnModoEntrarCli").className = "py-2 rounded-lg text-xs font-extrabold bg-white text-blue-900 shadow-sm";
+        document.getElementById("btnModoCadastrarCli").className = "py-2 rounded-lg text-xs font-extrabold text-slate-600";
+      }
+    }
+
+    async function submeterContaCliente(e) {
+      e.preventDefault();
+      const nome = document.getElementById("cadCliNome").value.trim();
+      const foneLimpo = normalizarFone(document.getElementById("cadCliTelefone").value);
+      const foneFormatado = formatarFonePadrao(foneLimpo);
+      const senha = document.getElementById("cadCliSenha").value.trim();
+      const errBox = document.getElementById("erroClienteBox");
+      const btn = document.getElementById("btnSubmeterCliente");
+
+      if (foneLimpo.length < 10) {
+        errBox.textContent = "Digite o DDD + número completo (Ex: (38) 99999-9999).";
+        errBox.classList.remove("hidden");
+        return;
+      }
+      if (!senha) {
+        errBox.textContent = "Digite uma senha.";
+        errBox.classList.remove("hidden");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "AGUARDE...";
+      errBox.classList.add("hidden");
+
+      try {
+        const docRef = db.collection(COLECAO_CLIENTES).doc(foneLimpo);
+        const docSnap = await docRef.get();
+
+        if (modoModalCliente === "cadastrar") {
+          if (!nome) {
+            errBox.textContent = "Informe seu nome ou nome da empresa.";
+            errBox.classList.remove("hidden");
+            return;
+          }
+          if (docSnap.exists) {
+            errBox.textContent = "Este WhatsApp já tem cadastro. Clique em 'Já tenho conta' para entrar.";
+            errBox.classList.remove("hidden");
+            return;
+          }
+          const dadosCliente = {
+            nome,
+            telefoneLimpo: foneLimpo,
+            telefoneFormatado: foneFormatado,
+            senha,
+            criadoEmMs: Date.now()
+          };
+          await docRef.set(dadosCliente);
+          clienteLogado = dadosCliente;
+          localStorage.setItem("metalica_cliente", JSON.stringify(clienteLogado));
+          fecharModalCliente();
+          atualizarUIClienteLogado();
+          avisar(`✅ Conta criada! Bem-vindo(a), ${nome}!`);
+        } else {
+          if (!docSnap.exists) {
+            errBox.textContent = "WhatsApp não encontrado. Clique em 'Criar conta nova'.";
+            errBox.classList.remove("hidden");
+            return;
+          }
+          const dados = docSnap.data();
+          if (dados.senha !== senha) {
+            errBox.textContent = "Senha incorreta.";
+            errBox.classList.remove("hidden");
+            return;
+          }
+          clienteLogado = dados;
+          localStorage.setItem("metalica_cliente", JSON.stringify(clienteLogado));
+          fecharModalCliente();
+          atualizarUIClienteLogado();
+          avisar(`✅ Bem-vindo(a) de volta, ${dados.nome}!`);
+        }
+
+        if (enviarCarrinhoAposLogin && carrinho.length > 0) {
+          enviarCarrinhoAposLogin = false;
+          await finalizarPedidoMarketplace();
+        }
+      } catch (err) {
+        errBox.textContent = "Erro de conexão: " + err.message;
+        errBox.classList.remove("hidden");
+      } finally {
+        btn.disabled = false;
+        alternarModoCliente(modoModalCliente);
+      }
+    }
+
+    function sairCliente() {
+      clienteLogado = null;
+      localStorage.removeItem("metalica_cliente");
+      document.getElementById("cliNome").value = "";
+      document.getElementById("cliTelefone").value = "";
+      atualizarUIClienteLogado();
+      avisar("Você saiu da sua conta.");
+    }
+
+    // =========================================================
+    // 3. LOGIN DA EQUIPE (admin / admin)
+    // =========================================================
+    function atualizarEstadoLoginEquipe() {
       if (adminLogado) {
         document.getElementById("visaoMarketplace").classList.add("hidden");
         document.getElementById("visaoResponsavel").classList.remove("hidden");
         document.getElementById("btnToggleLogin").classList.add("hidden");
+        document.getElementById("btnLoginClienteTop").classList.add("hidden");
+        document.getElementById("boxClienteLogadoTop").classList.add("hidden");
         document.getElementById("btnSairEquipe").classList.remove("hidden");
         renderizarPainelResponsavel();
       } else {
@@ -407,21 +682,22 @@
         document.getElementById("visaoResponsavel").classList.add("hidden");
         document.getElementById("btnToggleLogin").classList.remove("hidden");
         document.getElementById("btnSairEquipe").classList.add("hidden");
+        atualizarUIClienteLogado();
       }
     }
-    atualizarEstadoLogin();
+    atualizarEstadoLoginEquipe();
 
-    function abrirModalLogin() {
+    function abrirModalLoginEquipe() {
       document.getElementById("erroLoginBox").classList.add("hidden");
-      document.getElementById("modalLogin").classList.remove("hidden");
+      document.getElementById("modalLoginEquipe").classList.remove("hidden");
       setTimeout(() => document.getElementById("loginSenha").focus(), 50);
     }
 
-    function fecharModalLogin() {
-      document.getElementById("modalLogin").classList.add("hidden");
+    function fecharModalLoginEquipe() {
+      document.getElementById("modalLoginEquipe").classList.add("hidden");
     }
 
-    function fazerLogin(e) {
+    function fazerLoginEquipe(e) {
       if (e) e.preventDefault();
       const usuario = document.getElementById("loginUsuario").value.trim().toLowerCase();
       const senha = document.getElementById("loginSenha").value.trim();
@@ -431,8 +707,8 @@
         adminLogado = true;
         sessionStorage.setItem("metalica_admin", "1");
         document.getElementById("loginSenha").value = "";
-        fecharModalLogin();
-        atualizarEstadoLogin();
+        fecharModalLoginEquipe();
+        atualizarEstadoLoginEquipe();
         avisar("✅ Bem-vindo ao painel da Metálica!");
       } else {
         errBox.textContent = "Usuário ou senha incorretos. Use admin / admin.";
@@ -440,17 +716,17 @@
       }
     }
 
-    function sairDaConta() {
+    function sairDaContaEquipe() {
       adminLogado = false;
       sessionStorage.removeItem("metalica_admin");
-      atualizarEstadoLogin();
-      avisar("Você saiu da área restrita.");
+      atualizarEstadoLoginEquipe();
+      avisar("Você saiu da área da equipe.");
     }
 
     // =========================================================
-    // 3. ESCUTA EM TEMPO REAL DO FIRESTORE
+    // 4. ESCUTA EM TEMPO REAL DO FIRESTORE
     // =========================================================
-    db.collection(COLECAO).onSnapshot((snapshot) => {
+    db.collection(COLECAO_PEDIDOS).onSnapshot((snapshot) => {
       document.getElementById("dotNuvem").className = "w-2 h-2 rounded-full bg-emerald-400";
       document.getElementById("txtNuvem").textContent = "Online";
       document.getElementById("badgeNuvem").className = "flex items-center gap-1.5 bg-emerald-950/90 border border-emerald-700 px-2.5 py-1.5 rounded-full text-xs font-bold text-emerald-300";
@@ -462,7 +738,11 @@
       document.getElementById("statNovos").textContent = todosPedidos.filter(p => p.status === "ORCAMENTO").length;
       document.getElementById("statProd").textContent = todosPedidos.filter(p => p.status === "LIBERADO").length;
 
-      if (adminLogado) renderizarPainelResponsavel();
+      if (adminLogado) {
+        renderizarPainelResponsavel();
+      } else {
+        renderizarPedidosDoCliente();
+      }
     }, (err) => {
       console.error(err);
       document.getElementById("dotNuvem").className = "w-2 h-2 rounded-full bg-red-500";
@@ -473,7 +753,7 @@
     });
 
     // =========================================================
-    // 4. LÓGICA DO MARKETPLACE DO CLIENTE (VITRINE + CARRINHO)
+    // 5. VITRINE + CARRINHO DO CLIENTE
     // =========================================================
     function selecionarServicoVitrine(nome, procs, btn) {
       itemAtual.servico = nome;
@@ -587,12 +867,22 @@
 
     async function finalizarPedidoMarketplace() {
       if (carrinho.length === 0) return avisar("⚠️ Adicione pelo menos uma peça ao carrinho antes de enviar.");
-      const cliente = document.getElementById("cliNome").value.trim();
-      const telefone = document.getElementById("cliTelefone").value.trim();
-      const prazo = document.getElementById("cliPrazo").value;
 
-      if (!cliente) return avisar("⚠️ Informe seu nome ou empresa.");
-      if (!telefone) return avisar("⚠️ Informe seu WhatsApp.");
+      const foneDigitado = normalizarFone(document.getElementById("cliTelefone").value);
+      if (!clienteLogado) {
+        document.getElementById("cadCliNome").value = document.getElementById("cliNome").value.trim();
+        document.getElementById("cadCliTelefone").value = formatarFonePadrao(foneDigitado);
+        abrirModalCliente("cadastrar", true);
+        return;
+      }
+
+      if (foneDigitado && foneDigitado.length < 10) {
+        return avisar("⚠️ Informe o WhatsApp completo com DDD: (XX) XXXXX-XXXX.");
+      }
+
+      const cliente = document.getElementById("cliNome").value.trim() || clienteLogado.nome;
+      const telefone = formatarFonePadrao(foneDigitado || clienteLogado.telefoneLimpo);
+      const prazo = document.getElementById("cliPrazo").value;
 
       const btn = document.getElementById("btnFinalizarPedidoCli");
       btn.disabled = true;
@@ -601,8 +891,9 @@
       const numeroOS = "PED-" + String(Math.floor(1000 + Math.random() * 9000));
 
       try {
-        await db.collection(COLECAO).add({
+        await db.collection(COLECAO_PEDIDOS).add({
           numeroOS,
+          clienteId: clienteLogado.telefoneLimpo,
           cliente,
           telefone,
           prazo,
@@ -615,10 +906,8 @@
 
         carrinho = [];
         atualizarCarrinhoUI();
-        document.getElementById("inpBuscaPedido").value = numeroOS;
-        mudarAbaCliente("rastrear");
-        buscarPedidosCliente();
-        avisar(`✅ Pedido ${numeroOS} enviado com sucesso!`);
+        mudarAbaCliente("meusPedidos");
+        avisar(`✅ Pedido ${numeroOS} enviado! Aguarde o orçamento da Metálica.`);
       } catch (e) {
         alert("Erro ao enviar pedido: " + e.message);
       } finally {
@@ -628,24 +917,47 @@
     }
 
     // =========================================================
-    // 5. RASTREAMENTO & APROVAÇÃO PÚBLICA DO CLIENTE
+    // 6. MEUS PEDIDOS (HISTÓRICO DO CLIENTE + TEMPO REAL)
     // =========================================================
-    function buscarPedidosCliente() {
-      const termo = document.getElementById("inpBuscaPedido").value.trim().toLowerCase();
+    function renderizarPedidosDoCliente() {
       const box = document.getElementById("resultadoBuscaCliente");
-      if (!termo) return avisar("⚠️ Digite o código do pedido ou seu WhatsApp.");
+      const badgeQtd = document.getElementById("badgeQtdMeusPedidos");
+      const termoBusca = document.getElementById("inpBuscaPedido").value.trim().toLowerCase();
 
-      const encontrados = todosPedidos.filter(p =>
-        (p.numeroOS && p.numeroOS.toLowerCase().includes(termo)) ||
-        (p.telefone && p.telefone.replace(/\D/g, "").includes(termo.replace(/\D/g, "")) && termo.replace(/\D/g, "").length >= 4)
-      );
+      let lista = [];
 
-      if (encontrados.length === 0) {
-        box.innerHTML = `<div class="bg-white rounded-2xl border border-slate-200 p-6 text-center text-sm text-slate-500 font-semibold">Nenhum pedido encontrado com "${esc(termo)}".</div>`;
+      if (termoBusca) {
+        const foneBusca = normalizarFone(termoBusca);
+        lista = todosPedidos.filter(p =>
+          (p.numeroOS && p.numeroOS.toLowerCase().includes(termoBusca)) ||
+          (p.telefone && normalizarFone(p.telefone).includes(foneBusca) && foneBusca.length >= 4)
+        );
+      } else if (clienteLogado) {
+        lista = todosPedidos.filter(p =>
+          p.clienteId === clienteLogado.telefoneLimpo ||
+          normalizarFone(p.telefone) === clienteLogado.telefoneLimpo
+        );
+      }
+
+      if (clienteLogado) {
+        const meus = todosPedidos.filter(p =>
+          p.clienteId === clienteLogado.telefoneLimpo ||
+          normalizarFone(p.telefone) === clienteLogado.telefoneLimpo
+        );
+        badgeQtd.textContent = meus.length;
+        badgeQtd.classList.toggle("hidden", meus.length === 0);
+      } else {
+        badgeQtd.classList.add("hidden");
+      }
+
+      if (lista.length === 0) {
+        box.innerHTML = `<div class="bg-white rounded-2xl border border-slate-200 p-6 text-center text-sm text-slate-500 font-semibold">
+          ${clienteLogado ? "Você ainda não fez nenhum pedido. Clique em 'Fazer Pedido Sob Medida' acima." : "Entre na sua conta ou digite o código do pedido acima para acompanhar."}
+        </div>`;
         return;
       }
 
-      box.innerHTML = encontrados.map(p => {
+      box.innerHTML = lista.map(p => {
         let statusTexto = "⏳ Em análise de orçamento pela equipe";
         let corBadge = "bg-purple-100 text-purple-900";
 
@@ -659,7 +971,7 @@
           statusTexto = "🚨 Produção pausada para ajuste de medida";
           corBadge = "bg-red-100 text-red-900";
         } else if (p.status === "PRONTO") {
-          statusTexto = "🏁 Pedido pronto para retirada/entrega";
+          statusTexto = "🏁 Pedido finalizado! Pronto para retirada/entrega";
           corBadge = "bg-blue-100 text-blue-900";
         }
 
@@ -672,10 +984,11 @@
         `).join("");
 
         return `
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3">
+          <div class="bg-white rounded-2xl border-2 ${p.status === 'AGUARDANDO' ? 'border-amber-400' : (p.status === 'PRONTO' ? 'border-blue-500' : 'border-slate-200')} p-5 shadow-sm space-y-3">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
               <div>
                 <span class="text-xs font-black text-blue-800 bg-blue-50 px-2.5 py-1 rounded">${esc(p.numeroOS)}</span>
+                <span class="text-xs text-slate-500 ml-1">Prazo: ${formatarData(p.prazo)}</span>
                 <h3 class="text-base font-black text-slate-900 mt-1">${esc(p.cliente)}</h3>
               </div>
               <span class="px-3 py-1 rounded-full text-xs font-black ${corBadge}">${statusTexto}</span>
@@ -699,14 +1012,84 @@
     }
 
     async function aprovarOrcamentoPublico(id) {
-      await db.collection(COLECAO).doc(id).update({ status: "LIBERADO", aprovadoEm: new Date().toLocaleString("pt-BR") });
+      await db.collection(COLECAO_PEDIDOS).doc(id).update({ status: "LIBERADO", aprovadoEm: new Date().toLocaleString("pt-BR") });
       avisar("✅ Orçamento aprovado! A produção já foi liberada.");
-      buscarPedidosCliente();
     }
 
     // =========================================================
-    // 6. PAINEL EXCLUSIVO DO RESPONSÁVEL (LOGADO COMO admin)
+    // 7. PAINEL EXCLUSIVO DA EQUIPE + WHATSAPP (ORÇAMENTO & PRONTO)
     // =========================================================
+    function gerarLinkWhatsAppPedido(p, valorOverride) {
+      const valorFinal = valorOverride || p.valor;
+      const baseUrl = window.location.href.split("?")[0];
+      const linkDireto = `${baseUrl}?pedido=${encodeURIComponent(p.numeroOS)}`;
+
+      const resumoPecas = (p.itens || [])
+        .map((it, i) => `${i + 1}. ${it.servico} (${it.material} - ${it.medidasResumo})`)
+        .join("\n");
+
+      const mensagem =
+        `Olá *${p.cliente}*! Aqui é da *Metálica (Turmalina-MG)*.\n\n` +
+        `Seu orçamento *${p.numeroOS}* já está pronto:\n` +
+        `${resumoPecas}\n\n` +
+        `💰 *Valor Fechado:* R$ ${valorFinal}\n` +
+        `📅 *Prazo:* ${formatarData(p.prazo)} (${p.logistica})\n\n` +
+        `✅ *Clique no link abaixo para conferir e aprovar a fabricação:*\n${linkDireto}`;
+
+      const foneLimpo = normalizarFone(p.telefone);
+      const urlZap = foneLimpo
+        ? `https://wa.me/55${foneLimpo}?text=${encodeURIComponent(mensagem)}`
+        : `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
+
+      return { urlZap, mensagem, linkDireto };
+    }
+
+    function gerarLinkWhatsAppFinalizado(p) {
+      const baseUrl = window.location.href.split("?")[0];
+      const linkDireto = `${baseUrl}?pedido=${encodeURIComponent(p.numeroOS)}`;
+
+      const resumoPecas = (p.itens || [])
+        .map((it, i) => `${i + 1}. ${it.servico} (${it.medidasResumo})`)
+        .join("\n");
+
+      const infoEntrega = p.logistica === "Entrega Metálica"
+        ? `🚚 *Modalidade:* Entrega pela Metálica (entraremos em contato para combinar o horário).`
+        : `🏭 *Modalidade:* Já disponível para retirada na Metálica (Turmalina-MG).`;
+
+      const mensagem =
+        `Olá *${p.cliente}*! Boas notícias da *Metálica (Turmalina-MG)*! 🏁\n\n` +
+        `Seu pedido *${p.numeroOS}* foi *FINALIZADO* e está pronto!\n` +
+        `${resumoPecas}\n\n` +
+        `${infoEntrega}\n` +
+        `💰 *Valor:* R$ ${p.valor}\n\n` +
+        `Confira os detalhes do pedido no link:\n${linkDireto}`;
+
+      const foneLimpo = normalizarFone(p.telefone);
+      const urlZap = foneLimpo
+        ? `https://wa.me/55${foneLimpo}?text=${encodeURIComponent(mensagem)}`
+        : `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
+
+      return { urlZap, mensagem };
+    }
+
+    function abrirWhatsAppPedido(id) {
+      const p = todosPedidos.find(x => x.id === id);
+      if (!p) return;
+      const { urlZap, mensagem } = p.status === "PRONTO"
+        ? gerarLinkWhatsAppFinalizado(p)
+        : gerarLinkWhatsAppPedido(p);
+      try { navigator.clipboard.writeText(mensagem); } catch (_) {}
+      window.open(urlZap, "_blank");
+    }
+
+    async function copiarLinkDiretoCliente(id) {
+      const p = todosPedidos.find(x => x.id === id);
+      if (!p) return;
+      const { linkDireto } = gerarLinkWhatsAppPedido(p);
+      try { await navigator.clipboard.writeText(linkDireto); } catch (_) {}
+      avisar("🔗 Link copiado: " + linkDireto);
+    }
+
     function renderizarPainelResponsavel() {
       const cont = document.getElementById("listaPedidosResponsavel");
       const lista = filtroRespAtual === "TODOS" ? todosPedidos : todosPedidos.filter(p => p.status === filtroRespAtual);
@@ -730,8 +1113,8 @@
           selo = `<span class="bg-red-600 text-white px-3 py-1 rounded-full text-xs font-black">🚨 ALTERAÇÃO — PARAR!</span>`;
           borda = "border-red-600 alerta-alteracao";
         } else if (p.status === "PRONTO") {
-          selo = `<span class="bg-blue-100 text-blue-900 border border-blue-300 px-3 py-1 rounded-full text-xs font-black">🏁 PRONTO</span>`;
-          borda = "border-blue-300 opacity-85";
+          selo = `<span class="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-black">🏁 PRONTO / FINALIZADO</span>`;
+          borda = "border-blue-400";
         }
 
         const itensHtml = (p.itens || []).map((it, idx) => `
@@ -752,7 +1135,7 @@
               <div>
                 <span class="text-xs font-black text-blue-800 bg-blue-50 px-2 py-0.5 rounded">${esc(p.numeroOS)}</span>
                 <span class="text-xs font-bold text-slate-500 ml-1">Prazo: ${formatarData(p.prazo)} • ${esc(p.logistica)}</span>
-                <h3 class="text-lg font-black text-slate-900 mt-0.5">${esc(p.cliente)} <span class="text-xs font-semibold text-slate-500">(${esc(p.telefone)})</span></h3>
+                <h3 class="text-lg font-black text-slate-900 mt-0.5">${esc(p.cliente)} <span class="text-xs font-semibold text-slate-500">(${esc(formatarFonePadrao(p.telefone))})</span></h3>
               </div>
               <div>${selo}</div>
             </div>
@@ -763,11 +1146,19 @@
                   class="flex-1 bg-white border-2 border-purple-400 rounded-lg px-3 py-2 text-base font-black text-emerald-700 outline-none" />
                 <button onclick="salvarPrecoEquipe('${p.id}')"
                   class="bg-purple-700 hover:bg-purple-800 text-white font-extrabold text-xs py-3 px-4 rounded-xl">
-                  💰 Definir Preço & Liberar pro Cliente
+                  💰 Salvar Preço & Abrir WhatsApp
                 </button>
               </div>` : `
-              <div class="text-xs font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-2 rounded-xl">
-                Valor Fechado: R$ ${esc(p.valor)}
+              <div class="flex flex-wrap items-center justify-between gap-2 ${p.status === 'PRONTO' ? 'bg-blue-50 border-blue-200' : 'bg-emerald-50 border-emerald-200'} border px-3 py-2 rounded-xl">
+                <span class="text-xs font-extrabold ${p.status === 'PRONTO' ? 'text-blue-900' : 'text-emerald-900'}">Valor Fechado: R$ ${esc(p.valor)}</span>
+                <div class="flex gap-1.5">
+                  <button onclick="abrirWhatsAppPedido('${p.id}')" class="${p.status === 'PRONTO' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-emerald-600 hover:bg-emerald-700'} text-white text-xs font-extrabold px-3 py-1.5 rounded-lg">
+                    ${p.status === 'PRONTO' ? '📲 Avisar Cliente (Pedido Pronto)' : '📲 Enviar Orçamento no WhatsApp'}
+                  </button>
+                  <button onclick="copiarLinkDiretoCliente('${p.id}')" class="bg-white border border-slate-300 text-slate-800 text-xs font-extrabold px-2.5 py-1.5 rounded-lg">
+                    🔗 Copiar Link
+                  </button>
+                </div>
               </div>`}
 
             <div class="space-y-2">${itensHtml}</div>
@@ -776,7 +1167,7 @@
               ${p.status === "AGUARDANDO" ? `<button onclick="mudarStatusResp('${p.id}', 'LIBERADO')" class="col-span-2 bg-emerald-600 text-white font-extrabold text-xs py-3 px-3 rounded-xl">✅ Aprovar Manualmente</button>` : ""}
               ${p.status === "LIBERADO" ? `
                 <button onclick="mudarStatusResp('${p.id}', 'ALTERACAO')" class="bg-red-600 text-white font-extrabold text-xs py-3 px-2 rounded-xl">🚨 Pediu Alteração</button>
-                <button onclick="mudarStatusResp('${p.id}', 'PRONTO')" class="bg-blue-600 text-white font-extrabold text-xs py-3 px-2 rounded-xl">🏁 Concluir</button>` : ""}
+                <button onclick="concluirEAvisarCliente('${p.id}')" class="bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs py-3 px-2 rounded-xl">🏁 Concluir & Avisar WhatsApp</button>` : ""}
               ${p.status === "ALTERACAO" ? `<button onclick="mudarStatusResp('${p.id}', 'LIBERADO')" class="col-span-2 bg-emerald-600 text-white font-extrabold text-xs py-3 px-3 rounded-xl">✅ Retomar Produção</button>` : ""}
               <button onclick="imprimirOSResp('${p.id}')" class="bg-slate-100 text-slate-800 font-extrabold text-xs py-3 px-2 rounded-xl">🖨️ Imprimir OS</button>
               <button onclick="excluirOSResp('${p.id}')" class="bg-red-50 text-red-700 font-extrabold text-xs py-3 px-2 rounded-xl">🗑️ Excluir</button>
@@ -789,18 +1180,41 @@
     async function salvarPrecoEquipe(id) {
       const val = document.getElementById("preco-" + id).value.trim();
       if (!val) return avisar("⚠️ Digite o valor fechado.");
-      await db.collection(COLECAO).doc(id).update({ valor: val, status: "AGUARDANDO" });
-      avisar("✅ Preço salvo! O cliente já pode aprovar na aba Acompanhar Pedido.");
+      const p = todosPedidos.find(x => x.id === id);
+
+      await db.collection(COLECAO_PEDIDOS).doc(id).update({ valor: val, status: "AGUARDANDO" });
+      avisar("✅ Preço salvo! Abrindo WhatsApp do cliente...");
+
+      if (p) {
+        const { urlZap, mensagem } = gerarLinkWhatsAppPedido(p, val);
+        try { await navigator.clipboard.writeText(mensagem); } catch (_) {}
+        window.open(urlZap, "_blank");
+      }
+    }
+
+    async function concluirEAvisarCliente(id) {
+      const p = todosPedidos.find(x => x.id === id);
+      await db.collection(COLECAO_PEDIDOS).doc(id).update({
+        status: "PRONTO",
+        finalizadoEm: new Date().toLocaleString("pt-BR")
+      });
+      avisar("🏁 Pedido finalizado! Abrindo WhatsApp para avisar o cliente...");
+
+      if (p) {
+        const { urlZap, mensagem } = gerarLinkWhatsAppFinalizado(p);
+        try { await navigator.clipboard.writeText(mensagem); } catch (_) {}
+        window.open(urlZap, "_blank");
+      }
     }
 
     async function mudarStatusResp(id, s) {
-      await db.collection(COLECAO).doc(id).update({ status: s });
+      await db.collection(COLECAO_PEDIDOS).doc(id).update({ status: s });
       avisar("Status atualizado!");
     }
 
     async function excluirOSResp(id) {
       if (confirm("Deseja excluir este pedido?")) {
-        await db.collection(COLECAO).doc(id).delete();
+        await db.collection(COLECAO_PEDIDOS).doc(id).delete();
         avisar("Pedido excluído.");
       }
     }
@@ -820,7 +1234,7 @@
 
       area.innerHTML = `<div style="border:2px solid #000; padding:18px; font-family:Arial,sans-serif;">
         <h2>METÁLICA TURMALINA-MG • ${esc(p.numeroOS)}</h2>
-        <p><strong>Cliente:</strong> ${esc(p.cliente)} (${esc(p.telefone)}) | <strong>Prazo:</strong> ${formatarData(p.prazo)}</p>
+        <p><strong>Cliente:</strong> ${esc(p.cliente)} (${esc(formatarFonePadrao(p.telefone))}) | <strong>Prazo:</strong> ${formatarData(p.prazo)}</p>
         ${itensPrint}
       </div>`;
       window.print();
@@ -828,7 +1242,7 @@
     }
 
     // =========================================================
-    // 7. CANVAS & UTILITÁRIOS
+    // 8. CANVAS & UTILITÁRIOS
     // =========================================================
     const estadoCanvas = {};
     function inicializarCanvas(canvasId) {
@@ -871,9 +1285,10 @@
 
     function mudarAbaCliente(aba) {
       document.getElementById("secVitrine").classList.toggle("hidden", aba !== "vitrine");
-      document.getElementById("secRastrear").classList.toggle("hidden", aba !== "rastrear");
+      document.getElementById("secMeusPedidos").classList.toggle("hidden", aba !== "meusPedidos");
       document.getElementById("tabVitrine").className = aba === "vitrine" ? "px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-blue-900 text-white" : "px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-slate-100 text-slate-700 hover:bg-slate-200";
-      document.getElementById("tabRastrear").className = aba === "rastrear" ? "px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-blue-900 text-white" : "px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-slate-100 text-slate-700 hover:bg-slate-200";
+      document.getElementById("tabMeusPedidos").className = aba === "meusPedidos" ? "px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-blue-900 text-white flex items-center gap-1.5" : "px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center gap-1.5";
+      if (aba === "meusPedidos") renderizarPedidosDoCliente();
     }
 
     function filtrarResp(f) {
