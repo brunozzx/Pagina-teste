@@ -51,7 +51,7 @@
 
       <div class="flex flex-wrap items-center gap-2">
         <!-- SININHO DE NOTIFICAÇÕES PRÓPRIAS DO SITE -->
-        <div class="relative">
+        <div id="wrapperNotificacoes" class="relative">
           <button id="btnSinoNotif" onclick="alternarPainelNotificacoes()"
             class="relative bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white px-3 py-1.5 rounded-full text-xs font-extrabold flex items-center gap-1.5 transition">
             <span>🔔</span>
@@ -59,11 +59,15 @@
             <span id="badgeNotifNaoLidas" class="hidden bg-red-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full animate-bounce">0</span>
           </button>
 
-          <!-- DROPDOWN DA CENTRAL DE AVISOS -->
-          <div id="dropdownNotificacoes" class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white text-slate-900 rounded-2xl shadow-2xl border border-slate-200 z-50 overflow-hidden">
-            <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
-              <span class="text-xs font-black uppercase tracking-wider">🔔 Central de Notificações</span>
-              <button onclick="marcarTodasComoLidas()" class="text-[11px] font-bold text-amber-400 hover:underline">Limpar lidas</button>
+          <!-- DROPDOWN RESPONSIVO (CENTRALIZADO NO CELULAR / ANCORADO NO DESKTOP) -->
+          <div id="dropdownNotificacoes"
+            class="hidden fixed inset-x-3 top-24 sm:inset-auto sm:absolute sm:right-0 sm:top-full sm:mt-2 sm:w-96 bg-white text-slate-900 rounded-2xl shadow-2xl border border-slate-300 z-50 overflow-hidden">
+            <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between gap-2">
+              <span class="text-xs font-black uppercase tracking-wider">🔔 Central de Avisos</span>
+              <div class="flex items-center gap-3">
+                <button onclick="marcarTodasComoLidas()" class="text-[11px] font-bold text-amber-400 hover:underline">Limpar</button>
+                <button onclick="fecharPainelNotificacoes()" class="text-slate-300 hover:text-white font-black text-sm leading-none">✕</button>
+              </div>
             </div>
             <div id="bannerPermissaoPush" class="bg-blue-50 border-b border-blue-200 px-4 py-2.5 flex items-center justify-between gap-2">
               <span class="text-[11px] font-bold text-blue-900">Ative alertas na tela do aparelho:</span>
@@ -71,7 +75,7 @@
                 Ativar Alertas
               </button>
             </div>
-            <div id="listaNotificacoesSite" class="max-h-80 overflow-y-auto divide-y divide-slate-100 text-xs">
+            <div id="listaNotificacoesSite" class="max-h-72 sm:max-h-80 overflow-y-auto divide-y divide-slate-100 text-xs">
               <div class="p-6 text-center text-slate-400 font-semibold">Nenhuma notificação nova no momento.</div>
             </div>
           </div>
@@ -568,7 +572,7 @@
     }
 
     // =========================================================
-    // SISTEMA PRÓPRIO DE NOTIFICAÇÕES (SEM LIMITES)
+    // SISTEMA PRÓPRIO DE NOTIFICAÇÕES (RESPONSIVO)
     // =========================================================
     function tocarSomNotificacao() {
       try {
@@ -655,14 +659,18 @@
         <div onclick="abrirPedidoDaNotificacao('${esc(n.numeroOS || "")}')"
           class="p-3.5 cursor-pointer hover:bg-slate-50 transition ${n.lida ? 'opacity-70' : 'bg-blue-50/60'}">
           <div class="flex items-center justify-between gap-2">
-            <strong class="text-slate-900">${esc(n.titulo)}</strong>
-            <span class="text-[10px] font-bold text-slate-400">${esc(n.hora)}</span>
+            <strong class="text-slate-900 break-words">${esc(n.titulo)}</strong>
+            <span class="text-[10px] font-bold text-slate-400 shrink-0">${esc(n.hora)}</span>
           </div>
-          <p class="text-slate-600 mt-0.5 leading-snug">${esc(n.mensagem)}</p>
+          <p class="text-slate-600 mt-0.5 leading-snug break-words">${esc(n.mensagem)}</p>
         </div>
       `).join("");
     }
     renderizarCentralNotificacoes();
+
+    function fecharPainelNotificacoes() {
+      document.getElementById("dropdownNotificacoes").classList.add("hidden");
+    }
 
     function alternarPainelNotificacoes() {
       const drop = document.getElementById("dropdownNotificacoes");
@@ -674,6 +682,13 @@
       }
     }
 
+    document.addEventListener("click", (e) => {
+      const wrap = document.getElementById("wrapperNotificacoes");
+      if (wrap && !wrap.contains(e.target)) {
+        fecharPainelNotificacoes();
+      }
+    });
+
     function marcarTodasComoLidas() {
       notificacoesLocais = [];
       localStorage.setItem("metalica_notifs", "[]");
@@ -681,7 +696,7 @@
     }
 
     function abrirPedidoDaNotificacao(numeroOS) {
-      document.getElementById("dropdownNotificacoes").classList.add("hidden");
+      fecharPainelNotificacoes();
       if (!adminLogado) {
         if (numeroOS) document.getElementById("inpBuscaPedido").value = numeroOS;
         mudarAbaCliente("meusPedidos");
@@ -722,7 +737,7 @@
             if (p.status === "AGUARDANDO") {
               registrarNotificacaoSite(
                 `💰 Orçamento Pronto (${p.numeroOS})`,
-                `Valor fechado: R$ ${p.valor}. Clique para conferir e aprovar a fabricação.`,
+                `Valor fechado: R$ ${p.valor}. Toque para conferir e aprovar.`,
                 p.numeroOS
               );
             } else if (p.status === "LIBERADO") {
